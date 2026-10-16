@@ -83,11 +83,11 @@ O espaçamento segue uma escala curta, de 2 em 2 até 20; os cantos são sempre 
 
 ## Componentes
 
-São 34 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas. A primeira tabela cobre as telas principais; a segunda, os formulários e as telas internas.
+São 39 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas. A primeira tabela cobre as telas principais; a segunda, os formulários e as telas internas.
 
 | Componente | Props / variações | Especificação | Onde aparece |
 | --- | --- | --- | --- |
-| `Button` | `variant`: primary · secondary; `label`; `onPress` | Altura 44, canto 14, padding lateral 16, texto `button` com reticências se não couber. Primário: fundo `accent`, texto `onAccent`. Secundário: fundo `surface`, contorno 1,5 `accent`, texto `accent` | Todos os cards com ação |
+| `Button` | `variant`: primary · secondary · danger; `label`; `icon?`; `onPress` | Altura 44, canto 14, padding lateral 16, texto `button` com reticências se não couber. Primário: fundo `accent`, texto `onAccent`. Secundário: fundo `surface`, contorno 1,5 `accent`, texto `accent`. Perigo: fundo `surface`, contorno 1,5 `statusFar`, texto e ícone (`Trash2` 18) em `statusFar`, largura total | Todos os cards com ação |
 | `ButtonRow` | `secondary`, `primary` | Secundário com largura fixa de 112 à esquerda, primário ocupa o resto; espaço 8 | Treino de hoje, próxima refeição |
 | `ScreenHeader` | `title`, `subtitle?`, `action?` | Título `screenTitle`, subtítulo `body` `textMuted`, ação: círculo de 44 com ícone | Topo de todas as telas |
 | `Card` | `children`, `gap?` | Fundo `surface`, canto 20, padding 16, espaço interno 12 | Base de quase todos os blocos |
@@ -110,7 +110,7 @@ São 34 blocos que se repetem nas telas; cada um vira um componente no código, 
 | --- | --- | --- | --- |
 | `TopBar` | `title`, `subtitle?`, `leading`: back · close; `actionLabel?` | Botão circular de 40 (fundo `surface`) à esquerda, título `cardTitle` centralizado, ação em `accent` 15 Semi Bold à direita; laterais com 76 de largura para manter o título no centro | Todas as telas internas |
 | `BottomActionBar` | `primary`, `secondary?` | Fundo `surface`, borda superior de 1 em `track`, padding 16 (28 embaixo); contém um `ButtonRow` ou um `Button` primário de largura total. Fica fixa no rodapé | Telas internas com ação de salvar |
-| `TextField` | `label?`, `value`, `placeholder?`, `unit?`, `leadingIcon?`, `trailingIcon?`, `state`: default · focused · readonly | Altura 48 (40 na versão compacta), canto 12, padding 14. Padrão: fundo `surface`, borda 1 `track`. Em foco: borda 1,5 `accent`. Somente leitura: fundo `track`. Rótulo `caption` Medium `textMuted` acima, unidade em `textMuted` à direita | Formulários de perfil, aeróbico, bioimpedância, peso, metas |
+| `TextField` | `label?`, `value`, `placeholder?`, `unit?`, `leadingIcon?`, `trailingIcon?`, `state`: default · focused · readonly · warning | Altura 48 (40 na versão compacta), canto 12, padding 14. Padrão: fundo `surface`, borda 1 `track`. Em foco: borda 1,5 `accent`. Somente leitura: fundo `track`. Atenção (valor lido com pouca confiança): borda 1,5 `dietStrong`, rótulo em `dietStrong` e ícone `TriangleAlert` 16 à direita. Rótulo `caption` Medium `textMuted` acima, unidade em `textMuted` à direita | Formulários de perfil, aeróbico, bioimpedância, peso, metas |
 | `FieldRow` | `children` | Dois ou três `TextField` lado a lado, espaço 10 (8 na versão compacta) | Altura e peso, carga atual e alvo |
 | `SearchField` | `value`, `onClear` | `TextField` em foco com ícone `Search` à esquerda e `X` à direita | Adicionar alimento |
 | `SegmentedControl` | `options`, `selected` | Trilho `track` com canto 12 e padding 4; opção ativa com fundo `surface`, canto 9, texto 13 Semi Bold `text`; inativas em 13 Medium `textMuted` | Sexo, intensidade, períodos do gráfico, vitaminas/minerais |
@@ -125,7 +125,27 @@ São 34 blocos que se repetem nas telas; cada um vira um componente no código, 
 | `CalendarMonth` | `month`, `today`, `marked`: [{dia, tipo}] | Cabeçalho com mês e setas; 7 colunas de 38; hoje com fundo `accent`; previsão com contorno tracejado `dietStrong` | Ciclo menstrual |
 | `LineChart` | `data`, `range` | Linha de 2,5 em `accent` com ponta redonda, grade horizontal em `track`, rótulos 11 `textMuted`, ponto final de 10 com borda `surface`. Sugestão: `react-native-svg` ou `victory-native` | Evolução do peso |
 | `CameraScanner` | `mode`: barcode · label | Área da câmera com canto 20, moldura de cantos brancos (traço 4), linha de leitura em `accent`, instrução em branco 14 Medium, botão de flash; o fundo da câmera é sempre escuro nos dois temas | Escanear alimento |
+| `CounterRow` | `label`, `caption`, `value`, `min?`, `max?` | Linha com título 15 Medium e legenda `caption` à esquerda; à direita, botões de 40 (canto 12, fundo `track`, ícones `Minus`/`Plus`) com o valor 20 Bold centralizado entre eles (28 de largura) | Nova meta · Frequência (treinos e aeróbicos por semana) |
+| `ComparisonTable` | `columns`, `rows` | Dentro de um `Card`; cabeçalho 11 Medium `textMuted`; primeira coluna 13 Medium `textMuted` ocupando o espaço livre; demais colunas com 58 de largura, 13 Semi Bold `text`, alinhadas à direita; divisores de 1 em `track`, linhas com padding 10 vertical | Evolução da bioimpedância (comparação dos exames) |
+| `Radio` | `selected` | Círculo de 22. Marcado: borda 2 `accent` com ponto de 10 `accent`. Vazio: borda 1,5 `textMuted`. Usado no fim de um `ListRow`; opção indisponível fica com opacidade 45% | Tema, meta de calorias |
+| `BottomSheet` | `title`, `children`, `onClose` | Fundo escurecido (preto 55%) sobre a tela; folha `surface` presa embaixo, cantos superiores 24, alça 36 × 4 em `track`, padding 16 (28 embaixo), espaço 14 | Editar item consumido |
+| `BarChart` | `data`, `range` | Barras de 24 com cantos superiores 6; dentro da meta em `statusNear`, fora em `statusMid`; faixa da meta (±7%) em `track` atrás das barras; rótulos 11 `textMuted` | Histórico da dieta |
 | `InfoBanner` | `icon`, `message`, `tone`: warning · info | Variação do `Banner`: aviso usa `tileDiet` + `dietStrong`; informação usa `track` + `textMuted` | Revisão de importação, privacidade, dicas |
+
+## Mapa de telas
+
+O Figma tem 50 telas, todas em tema claro e escuro, organizadas na página **Telas** em um quadro por área, na ordem do fluxo.
+
+| Área | Telas |
+| --- | --- |
+| Entrada no app (3) | Boas-vindas e perfil, Consentimento de dados, Conectar Apple Saúde |
+| Início (1) | Início |
+| Treino (12) | Treino, Treino sem plano, Treino em andamento, Treino concluído, Registrar aeróbico, Atividade duplicada, Histórico de treinos, Detalhe da sessão, Evolução do exercício, Importar ficha, Editar plano de treino, Escolher exercício |
+| Dieta (13) | Dieta, Dieta sem plano, Adicionar alimento, Escanear alimento, Cadastrar alimento, Editar item consumido, Micronutrientes, Histórico da dieta, Editar dieta, Importar dieta, Origem da importação, Lendo arquivo, Erro na leitura |
+| Metas (7) | Metas, Nova meta (Carga, Frequência, Peso corporal, Dieta), Detalhe da meta, Meta atingida |
+| Perfil (14) | Perfil, Editar perfil, Registrar peso, Registrar bioimpedância, Revisar laudo, Evolução da bioimpedância, Ciclo menstrual, Registrar menstruação, Apple Saúde, Tema, Unidades, Meta de calorias, Privacidade e dados, Sobre o app |
+
+Fica para depois: as telas de notificações (RF56–RF63), fora do escopo do MVP.
 
 ## Ícones
 
@@ -165,7 +185,8 @@ Dentro de um `IconTile`, o ícone usa a cor forte do tom (`accent` ou `dietStron
 5. **Textos humanos.** Cards de progresso terminam com uma frase de orientação em `bodySmall` (ex.: "Falta 1 treino para bater a meta da semana").
 6. **Nada sai da tela.** Rótulos de botão e títulos de uma linha usam reticências; textos longos quebram linha com largura total do card.
 7. **Contraste mínimo de 4,5:1 (RNF09).** Já garantido pelos pares `accent`/`onAccent` e `text`/`surface` nos dois temas; ao criar novos pares, verifique.
-8. **Cards condicionais.** Aviso (`Banner`), recorde pessoal, ciclo menstrual e relógio só aparecem quando há dado para mostrar.
+8. **Ações destrutivas.** Usam o `Button` de perigo, ficam no último card da tela, sempre com um texto explicando o que será apagado, e pedem confirmação antes de executar.
+9. **Cards condicionais.** Aviso (`Banner`), recorde pessoal, ciclo menstrual e relógio só aparecem quando há dado para mostrar.
 
 ## Tokens em código (TypeScript)
 
