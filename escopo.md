@@ -28,23 +28,29 @@ A navegação principal é uma barra inferior fixa com 5 atalhos, com Início no
 
 ## Identidade visual
 
-A paleta une azul-marinho (seriedade e confiança) com laranja (motivação), seguindo a lógica de combinações de "A Psicologia das Cores", de Eva Heller. Os tons abaixo são para teste no Figma, incluindo contraste e modo escuro.
+O app tem dois temas, definidos após testes no Figma (16/10/2026): o claro segue a direção "Verde vital" (base clara, verde-esmeralda) e o escuro segue a direção "Energia esportiva" (fundo escuro, verde-limão e laranja). No Figma, as cores estão na coleção de variáveis "Tema", com os modos Claro e Escuro. Os detalhes de implementação estão no [Guia de Interface](guia-de-interface.md).
 
-| Cor | Uso | Claro 3 | Claro 2 | Claro 1 | Base | Escuro 1 | Escuro 2 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Azul-marinho | Base da marca: cabeçalhos, áreas de destaque | #E7EAED | #9FAAB7 | #576A80 | #0F2A4A | #0B2038 | #081525 |
-| Azul | Apoio: links, elementos secundários | #E8EEF6 | #A5BDDC | #628CC2 | #1E5AA8 | #16447E | #0F2D54 |
-| Laranja | Ação: botão principal, atalho ativo, treino | #FEF0E8 | #FAC4A5 | #F69761 | #F26B1D | #B65016 | #79360E |
-| Teal | Dieta | #E7F6F6 | #A1DAD9 | #5ABFBC | #13A3A0 | #0E7A78 | #0A5250 |
-| Verde | Status: na meta / dentro da margem | #E8F5EE | #A5D8BD | #62BB8C | #1E9E5A | #167644 | #0F4F2D |
-| Âmbar | Status: atenção | #FCF6E6 | #F5D999 | #EDBD4C | #E5A100 | #AC7900 | #725000 |
-| Vermelho | Status: alerta / acima do limite | #FBEBEB | #F0B0B0 | #E47575 | #D93A3A | #A32C2C | #6C1D1D |
+| Cor | Uso | Tema claro | Tema escuro |
+| --- | --- | --- | --- |
+| Fundo | Fundo das telas | #F6F8F7 | #0B0D10 |
+| Superfície | Cards e barra de navegação | #FFFFFF | #16191E |
+| Texto | Texto principal | #13201B | #F4F5F6 |
+| Texto secundário | Legendas e detalhes | #5E6E67 | #9AA3AE |
+| Destaque | Botões principais, treino, aba ativa | #0B8457 | #C6F432 |
+| Texto sobre destaque | Rótulo dos botões principais | #FFFFFF | #0B0D10 |
+| Dieta | Calorias, alimentação | #F59E0B | #FF7A1A |
+| Proteína | Anel e barra de proteína, micronutrientes | #3B82F6 | #38BDF8 |
+| Trilho | Fundo de barras, divisores | #E6ECE9 | #262A31 |
+| Status: longe | Meta abaixo de 40% | #D93A3A | #FF4D4F |
+| Status: meio | Meta de 40% a 79% | #E5A100 | #FFB020 |
+| Status: perto | Meta a partir de 80% | #1E9E5A | #3DDC84 |
 
-Claro 3, 2 e 1 = base misturada com 90%, 60% e 30% de branco; Escuro 1 e 2 = base com 25% e 50% de preto.
-
-- **RNF08** — O laranja é usado apenas em elementos de ação e destaque, no máximo um botão principal por tela.
+- **RNF08** — A cor de destaque é usada apenas em elementos de ação; cada card tem no máximo um botão principal (preenchido) e um secundário (contorno), ambos do componente Botão: 44 px de altura, Inter Semi Bold 14.
 - **RNF09** — Textos sobre cores devem ter contraste mínimo de 4,5:1 (WCAG AA).
 - **RNF10** — O app deve ter modo claro e modo escuro.
+- **RNF11** — A cor das barras de progresso das metas indica a distância até a meta, com cor única por barra: vermelho abaixo de 40% da meta, âmbar de 40% a 79% e verde a partir de 80%. Na direção de fundo escuro, os mesmos três estados usam tons mais vivos.
+
+**Telas desenhadas no Figma:** Início, Treino, Dieta, Metas e Perfil, cada uma nos temas claro e escuro, usando os componentes Botão e Barra de navegação.
 
 ## Requisitos funcionais
 
@@ -144,7 +150,7 @@ As notificações ficam fora do MVP e entram numa versão posterior.
 - **RNF05** — No MVP, todos os dados ficam armazenados apenas no aparelho, sem conta nem login.
 - **RNF06** — A base de alimentos deve usar a TBCA (Tabela Brasileira de Composição de Alimentos, FoRC/USP) como fonte principal, embarcada no app para funcionar offline. Produtos de marca que não estão na TBCA são cobertos por código de barras e leitura da tabela nutricional (RF38–RF40).
 - **RNF07** — A arquitetura de dados deve permitir migrar os dados locais para uma conta na nuvem no lançamento, sem perda de histórico.
-- **RNF08 a RNF10** — Ver [Identidade visual](#identidade-visual).
+- **RNF08 a RNF11** — Ver [Identidade visual](#identidade-visual).
 
 ## Regras de negócio
 
