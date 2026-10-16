@@ -83,11 +83,11 @@ O espaçamento segue uma escala curta, de 2 em 2 até 20; os cantos são sempre 
 
 ## Componentes
 
-São 39 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas. A primeira tabela cobre as telas principais; a segunda, os formulários e as telas internas.
+São 41 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas. A primeira tabela cobre as telas principais; a segunda, os formulários e as telas internas.
 
 | Componente | Props / variações | Especificação | Onde aparece |
 | --- | --- | --- | --- |
-| `Button` | `variant`: primary · secondary · danger; `label`; `icon?`; `onPress` | Altura 44, canto 14, padding lateral 16, texto `button` com reticências se não couber. Primário: fundo `accent`, texto `onAccent`. Secundário: fundo `surface`, contorno 1,5 `accent`, texto `accent`. Perigo: fundo `surface`, contorno 1,5 `statusFar`, texto e ícone (`Trash2` 18) em `statusFar`, largura total | Todos os cards com ação |
+| `Button` | `variant`: primary · secondary · danger; `label`; `icon?`; `onPress` | Altura 44, canto 14, padding lateral 16, texto `button` com reticências se não couber. Primário: fundo `accent`, texto `onAccent`. Secundário: fundo `surface`, contorno 1,5 `accent`, texto `accent`. Perigo: fundo `surface`, contorno 1,5 `statusFar`, texto e ícone (`Trash2` 18) em `statusFar`, largura total. Perigo confirmado (só dentro do `ConfirmDialog`): fundo `statusFar`, texto `onAccent` | Todos os cards com ação |
 | `ButtonRow` | `secondary`, `primary` | Secundário com largura fixa de 112 à esquerda, primário ocupa o resto; espaço 8 | Treino de hoje, próxima refeição |
 | `ScreenHeader` | `title`, `subtitle?`, `action?` | Título `screenTitle`, subtítulo `body` `textMuted`, ação: círculo de 44 com ícone | Topo de todas as telas |
 | `Card` | `children`, `gap?` | Fundo `surface`, canto 20, padding 16, espaço interno 12 | Base de quase todos os blocos |
@@ -128,22 +128,26 @@ São 39 blocos que se repetem nas telas; cada um vira um componente no código, 
 | `CounterRow` | `label`, `caption`, `value`, `min?`, `max?` | Linha com título 15 Medium e legenda `caption` à esquerda; à direita, botões de 40 (canto 12, fundo `track`, ícones `Minus`/`Plus`) com o valor 20 Bold centralizado entre eles (28 de largura) | Nova meta · Frequência (treinos e aeróbicos por semana) |
 | `ComparisonTable` | `columns`, `rows` | Dentro de um `Card`; cabeçalho 11 Medium `textMuted`; primeira coluna 13 Medium `textMuted` ocupando o espaço livre; demais colunas com 58 de largura, 13 Semi Bold `text`, alinhadas à direita; divisores de 1 em `track`, linhas com padding 10 vertical | Evolução da bioimpedância (comparação dos exames) |
 | `Radio` | `selected` | Círculo de 22. Marcado: borda 2 `accent` com ponto de 10 `accent`. Vazio: borda 1,5 `textMuted`. Usado no fim de um `ListRow`; opção indisponível fica com opacidade 45% | Tema, meta de calorias |
-| `BottomSheet` | `title`, `children`, `onClose` | Fundo escurecido (preto 55%) sobre a tela; folha `surface` presa embaixo, cantos superiores 24, alça 36 × 4 em `track`, padding 16 (28 embaixo), espaço 14 | Editar item consumido |
+| `BottomSheet` | `title`, `children`, `onClose` | Fundo escurecido (preto 55%) sobre a tela; folha `surface` presa embaixo, cantos superiores 24, alça 36 × 4 em `track`, padding 16 (28 embaixo), espaço 14 | Editar item consumido, Sair do treino (pausar, finalizar ou continuar; nunca descarta o que foi feito) |
 | `BarChart` | `data`, `range` | Barras de 24 com cantos superiores 6; dentro da meta em `statusNear`, fora em `statusMid`; faixa da meta (±7%) em `track` atrás das barras; rótulos 11 `textMuted` | Histórico da dieta |
+| `ConfirmDialog` | `title`, `message`, `confirmLabel`, `onConfirm` | Fundo escurecido (preto 55%); caixa `surface` de 342 centralizada, canto 24, padding 20 (24 em cima); `IconTile` 52 com `Trash2` em `statusFar` sobre `track`, título 19 Bold, mensagem 14 `textMuted` centralizada; botões Cancelar (secundário, 112) + confirmar (perigo preenchido) | Excluir meta, excluir dados, desconectar, remover do dia, descartar importação |
+| `CyclePhaseTag` | `phase`: menstrual · folicular · lutea · ovulatoria; `day?` | Variação do `Tag`: menstrual em `tileDiet` + `dietStrong`; folicular em `tileTraining` + `accent`; lútea e ovulatória em `track` + `textMuted`. Só aparece para quem ativou o ciclo | Aba Treino, treino em andamento, histórico e detalhe da sessão (RF54) |
 | `InfoBanner` | `icon`, `message`, `tone`: warning · info | Variação do `Banner`: aviso usa `tileDiet` + `dietStrong`; informação usa `track` + `textMuted` | Revisão de importação, privacidade, dicas |
 
 ## Mapa de telas
 
-O Figma tem 50 telas, todas em tema claro e escuro, organizadas na página **Telas** em um quadro por área, na ordem do fluxo.
+O Figma tem 71 telas, todas em tema claro e escuro, organizadas na página **Telas** em um quadro por área, na ordem do fluxo. As telas marcadas com "· ciclo" ou "· menstruação" são as versões para quem ativou o registro do ciclo menstrual.
 
 | Área | Telas |
 | --- | --- |
 | Entrada no app (3) | Boas-vindas e perfil, Consentimento de dados, Conectar Apple Saúde |
-| Início (1) | Início |
-| Treino (12) | Treino, Treino sem plano, Treino em andamento, Treino concluído, Registrar aeróbico, Atividade duplicada, Histórico de treinos, Detalhe da sessão, Evolução do exercício, Importar ficha, Editar plano de treino, Escolher exercício |
-| Dieta (13) | Dieta, Dieta sem plano, Adicionar alimento, Escanear alimento, Cadastrar alimento, Editar item consumido, Micronutrientes, Histórico da dieta, Editar dieta, Importar dieta, Origem da importação, Lendo arquivo, Erro na leitura |
-| Metas (7) | Metas, Nova meta (Carga, Frequência, Peso corporal, Dieta), Detalhe da meta, Meta atingida |
-| Perfil (14) | Perfil, Editar perfil, Registrar peso, Registrar bioimpedância, Revisar laudo, Evolução da bioimpedância, Ciclo menstrual, Registrar menstruação, Apple Saúde, Tema, Unidades, Meta de calorias, Privacidade e dados, Sobre o app |
+| Início (3) | Início, Início · primeiro dia, Início · treino pausado |
+| Treino (19) | Treino, Treino de hoje, Treino · menstruação, Treino sem plano, Treino em andamento, Treino em andamento · ciclo, Sair do treino, Treino concluído, Registrar aeróbico, Atividade duplicada, Histórico de treinos, Histórico de treinos · ciclo, Detalhe da sessão, Detalhe da sessão · ciclo, Evolução do exercício, Importar ficha, Editar plano de treino, Escolher exercício, Criar exercício |
+| Dieta (19) | Dieta, Dieta de hoje, Detalhe da refeição, Detalhe da refeição · pendente, Dieta sem plano, Adicionar alimento, Escanear alimento, Escanear tabela nutricional, Revisar tabela nutricional, Produto não encontrado, Cadastrar alimento, Editar item consumido, Micronutrientes, Histórico da dieta, Editar dieta, Importar dieta, Origem da importação, Lendo arquivo, Erro na leitura |
+| Metas (9) | Metas, Nova meta (Carga, Frequência, Peso corporal, Dieta), Detalhe da meta, Confirmar exclusão, Meta atingida, Metas concluídas |
+| Perfil (18) | Perfil, Editar perfil, Registrar peso, Registrar bioimpedância, Revisar laudo, Evolução da bioimpedância, Ciclo menstrual, Registrar menstruação, Apple Saúde, Tema, Unidades, Meta de calorias, Privacidade e dados, Exportar meus dados, Exportação pronta, Política de privacidade, Termos de uso, Sobre o app |
+
+Casos que reaproveitam telas existentes: editar uma sessão passada (layout do Treino em andamento), editar uma meta (Nova meta preenchida), editar quantidade no Editar dieta (mesmo `BottomSheet` do Editar item consumido), Health Connect no Android (telas do Apple Saúde com outro nome) e exportar dados (tela de compartilhar do sistema).
 
 Fica para depois: as telas de notificações (RF56–RF63), fora do escopo do MVP.
 
@@ -186,7 +190,12 @@ Dentro de um `IconTile`, o ícone usa a cor forte do tom (`accent` ou `dietStron
 6. **Nada sai da tela.** Rótulos de botão e títulos de uma linha usam reticências; textos longos quebram linha com largura total do card.
 7. **Contraste mínimo de 4,5:1 (RNF09).** Já garantido pelos pares `accent`/`onAccent` e `text`/`surface` nos dois temas; ao criar novos pares, verifique.
 8. **Ações destrutivas.** Usam o `Button` de perigo, ficam no último card da tela, sempre com um texto explicando o que será apagado, e pedem confirmação antes de executar.
-9. **Cards condicionais.** Aviso (`Banner`), recorde pessoal, ciclo menstrual e relógio só aparecem quando há dado para mostrar.
+9. **Rodapé fixo só em telas de ação.** O `BottomActionBar` aparece onde a pessoa precisa concluir algo (salvar, criar, iniciar). Telas de consulta, como o detalhe de uma sessão, não têm rodapé fixo: a ação de editar fica no canto superior direito do `TopBar` e as outras ações ficam no fim do conteúdo (secundário em cima), seguidas de um `Button` primário "OK" que volta para a tela anterior.
+10. **Atalhos da Início abrem por cima.** Um botão da Início que mostra conteúdo de outra aba ("Ver treino" abre Treino de hoje; "Ver dieta" abre Dieta de hoje) abre uma tela que sobe de baixo, com `X` no `TopBar` para fechar e voltar à Início, em vez de trocar de aba.
+11. **Fim do treino volta para a Início.** Em Treino concluído, tanto "Concluir" quanto o `X` levam à Início, de onde quer que o treino tenha começado; a tela não volta para o treino já encerrado.
+12. **Cabeçalho e rodapé fixos.** Só o conteúdo rola: o `TopBar` (ou o cabeçalho das abas) fica preso no topo com fundo `background`, e o `BottomActionBar` ou a `TabBar` ficam presos embaixo. No código: cabeçalho e rodapé fora do `ScrollView`, dentro de um `SafeAreaView`.
+13. **Fechar a câmera volta para a Início.** Nas telas de escanear (código de barras e tabela nutricional), o `X` leva à Início, de onde quer que a câmera tenha sido aberta.
+14. **Cards condicionais.** Aviso (`Banner`), recorde pessoal, ciclo menstrual e relógio só aparecem quando há dado para mostrar.
 
 ## Tokens em código (TypeScript)
 
