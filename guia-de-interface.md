@@ -83,7 +83,7 @@ O espaçamento segue uma escala curta, de 2 em 2 até 20; os cantos são sempre 
 
 ## Componentes
 
-São 16 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas.
+São 34 blocos que se repetem nas telas; cada um vira um componente no código, com as props indicadas. A primeira tabela cobre as telas principais; a segunda, os formulários e as telas internas.
 
 | Componente | Props / variações | Especificação | Onde aparece |
 | --- | --- | --- | --- |
@@ -103,6 +103,29 @@ São 16 blocos que se repetem nas telas; cada um vira um componente no código, 
 | `Banner` | `icon`, `message`, `actionLabel` | Fundo `tileDiet`, canto 16, padding 14 × 12, ação em `dietStrong` | Avisos contextuais no topo da Início |
 | `WeekStrip` | `days`: [{dia, treinou, dietaOk}] | 7 círculos de 36: treino = `accent`; hoje = contorno `accent`; ponto de 6 em `diet` se a dieta ficou na meta | Card "Sua semana" |
 | `TabBar` | `active`: metas · treino · início · dieta · perfil | Fundo `surface`, borda superior `track`, ícone 22 numa pílula 56 × 30 (`navActiveBg` quando ativa), rótulo `label` | Rodapé de todas as telas |
+
+### Formulários e telas internas
+
+| Componente | Props / variações | Especificação | Onde aparece |
+| --- | --- | --- | --- |
+| `TopBar` | `title`, `subtitle?`, `leading`: back · close; `actionLabel?` | Botão circular de 40 (fundo `surface`) à esquerda, título `cardTitle` centralizado, ação em `accent` 15 Semi Bold à direita; laterais com 76 de largura para manter o título no centro | Todas as telas internas |
+| `BottomActionBar` | `primary`, `secondary?` | Fundo `surface`, borda superior de 1 em `track`, padding 16 (28 embaixo); contém um `ButtonRow` ou um `Button` primário de largura total. Fica fixa no rodapé | Telas internas com ação de salvar |
+| `TextField` | `label?`, `value`, `placeholder?`, `unit?`, `leadingIcon?`, `trailingIcon?`, `state`: default · focused · readonly | Altura 48 (40 na versão compacta), canto 12, padding 14. Padrão: fundo `surface`, borda 1 `track`. Em foco: borda 1,5 `accent`. Somente leitura: fundo `track`. Rótulo `caption` Medium `textMuted` acima, unidade em `textMuted` à direita | Formulários de perfil, aeróbico, bioimpedância, peso, metas |
+| `FieldRow` | `children` | Dois ou três `TextField` lado a lado, espaço 10 (8 na versão compacta) | Altura e peso, carga atual e alvo |
+| `SearchField` | `value`, `onClear` | `TextField` em foco com ícone `Search` à esquerda e `X` à direita | Adicionar alimento |
+| `SegmentedControl` | `options`, `selected` | Trilho `track` com canto 12 e padding 4; opção ativa com fundo `surface`, canto 9, texto 13 Semi Bold `text`; inativas em 13 Medium `textMuted` | Sexo, intensidade, períodos do gráfico, vitaminas/minerais |
+| `ChipGroup` | `options`, `selected` (um ou vários), `wrap` | `Chip` com quebra de linha automática, espaço 8 nas duas direções | Tipo de aeróbico, objetivo, sintomas |
+| `Checkbox` | `checked` | Quadrado de 24, canto 7. Marcada: fundo `accent` com `Check` 16 em `onAccent`. Vazia: borda 1,5 `textMuted` | Consentimentos (LGPD) |
+| `Toggle` | `value` | 44 × 26, canto 13, bolinha de 20. Ligado: trilho `accent`, bolinha `onAccent`. Desligado: trilho `track`, bolinha `surface` | Permissões, integrações, vincular aeróbico |
+| `Stepper` | `onDecrement`, `onIncrement` | Dois quadrados de 48, canto 12, fundo `track`, ícones `Minus` e `Plus` em `text` | Quantidade de alimento |
+| `ProgressSteps` | `step`, `total` | Texto "Passo X de Y" em `caption` e segmentos de 4 de altura (canto 2): concluídos em `accent`, restantes em `track` | Boas-vindas, consentimento, Apple Saúde |
+| `NutrientBox` | `label`, `value` | Fundo `track`, canto 12, padding 10 vertical; valor 15 Bold `text` e rótulo 11 Medium `textMuted`, centralizados; em linhas de 3 ou 4 | Alimento selecionado, produto escaneado |
+| `SetRow` | `index`, `weight`, `reps`, `state`: done · current · next | Círculo de 36 com o número, dois campos compactos (40 de altura) e caixa de 40 para marcar. Feita: campos em `track` e caixa `accent` com check. Atual: campos com borda `accent` | Treino em andamento |
+| `SelectCard` | `icon`, `title`, `description`, `selected` | `Card` com padding 14, `IconTile` 36, título 15 Semi Bold e descrição `caption`; selecionado com borda 2 `accent`; em grade de 2 colunas | Tipo de meta |
+| `CalendarMonth` | `month`, `today`, `marked`: [{dia, tipo}] | Cabeçalho com mês e setas; 7 colunas de 38; hoje com fundo `accent`; previsão com contorno tracejado `dietStrong` | Ciclo menstrual |
+| `LineChart` | `data`, `range` | Linha de 2,5 em `accent` com ponta redonda, grade horizontal em `track`, rótulos 11 `textMuted`, ponto final de 10 com borda `surface`. Sugestão: `react-native-svg` ou `victory-native` | Evolução do peso |
+| `CameraScanner` | `mode`: barcode · label | Área da câmera com canto 20, moldura de cantos brancos (traço 4), linha de leitura em `accent`, instrução em branco 14 Medium, botão de flash; o fundo da câmera é sempre escuro nos dois temas | Escanear alimento |
+| `InfoBanner` | `icon`, `message`, `tone`: warning · info | Variação do `Banner`: aviso usa `tileDiet` + `dietStrong`; informação usa `track` + `textMuted` | Revisão de importação, privacidade, dicas |
 
 ## Ícones
 
@@ -128,6 +151,8 @@ Os ícones são de traço (contorno), com traço 2, pontas arredondadas e grade 
 | Integração de saúde | `Heart` | 20 |
 | Configurações | `Settings`, `Moon`, `Ruler`, `Lock`, `Download`, `Info` | 20 |
 | Navegação em listas | `ChevronRight` | 16–18 |
+
+Nas telas internas também aparecem: `Search`, `X`, `Minus`, `ChevronLeft`, `Zap` (flash), `TriangleAlert` (revisar), `FileText` (PDF), `Watch` (relógio), `Droplet` (ciclo), `GripVertical` (arrastar), `Trash2` (remover) e `Link` (vincular).
 
 Dentro de um `IconTile`, o ícone usa a cor forte do tom (`accent` ou `dietStrong`) sobre o fundo claro do mesmo tom (`tileTraining` ou `tileDiet`).
 
