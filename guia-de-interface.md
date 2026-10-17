@@ -136,7 +136,7 @@ São 41 blocos que se repetem nas telas; cada um vira um componente no código, 
 
 ## Mapa de telas
 
-O Figma tem 71 telas, todas em tema claro e escuro, organizadas na página **Telas** em um quadro por área, na ordem do fluxo. As telas marcadas com "· ciclo" ou "· menstruação" são as versões para quem ativou o registro do ciclo menstrual.
+O Figma tem 74 telas, todas em tema claro e escuro, organizadas na página **Telas** em um quadro por área, na ordem do fluxo. As telas marcadas com "· ciclo" ou "· menstruação" são as versões para quem ativou o registro do ciclo menstrual.
 
 | Área | Telas |
 | --- | --- |
@@ -144,7 +144,7 @@ O Figma tem 71 telas, todas em tema claro e escuro, organizadas na página **Tel
 | Início (3) | Início, Início · primeiro dia, Início · treino pausado |
 | Treino (19) | Treino, Treino de hoje, Treino · menstruação, Treino sem plano, Treino em andamento, Treino em andamento · ciclo, Sair do treino, Treino concluído, Registrar aeróbico, Atividade duplicada, Histórico de treinos, Histórico de treinos · ciclo, Detalhe da sessão, Detalhe da sessão · ciclo, Evolução do exercício, Importar ficha, Editar plano de treino, Escolher exercício, Criar exercício |
 | Dieta (19) | Dieta, Dieta de hoje, Detalhe da refeição, Detalhe da refeição · pendente, Dieta sem plano, Adicionar alimento, Escanear alimento, Escanear tabela nutricional, Revisar tabela nutricional, Produto não encontrado, Cadastrar alimento, Editar item consumido, Micronutrientes, Histórico da dieta, Editar dieta, Importar dieta, Origem da importação, Lendo arquivo, Erro na leitura |
-| Metas (9) | Metas, Nova meta (Carga, Frequência, Peso corporal, Dieta), Detalhe da meta, Confirmar exclusão, Meta atingida, Metas concluídas |
+| Metas (12) | Metas, Nova meta (Carga, Frequência, Peso corporal, Dieta), Detalhe da meta (Carga, Frequência, Peso corporal, Dieta), Confirmar exclusão, Meta atingida, Metas concluídas |
 | Perfil (18) | Perfil, Editar perfil, Registrar peso, Registrar bioimpedância, Revisar laudo, Evolução da bioimpedância, Ciclo menstrual, Registrar menstruação, Apple Saúde, Tema, Unidades, Meta de calorias, Privacidade e dados, Exportar meus dados, Exportação pronta, Política de privacidade, Termos de uso, Sobre o app |
 
 Casos que reaproveitam telas existentes: editar uma sessão passada (layout do Treino em andamento), editar uma meta (Nova meta preenchida), editar quantidade no Editar dieta (mesmo `BottomSheet` do Editar item consumido), Health Connect no Android (telas do Apple Saúde com outro nome) e exportar dados (tela de compartilhar do sistema).

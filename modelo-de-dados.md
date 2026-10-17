@@ -1,6 +1,6 @@
 # Modelo de Dados do App de Treino e Dieta
 
-Atualizado em 16/10/2026.
+Atualizado em 17/10/2026.
 
 ## Decisões gerais
 
@@ -116,7 +116,7 @@ O treino separa o que foi **planejado** (plano → treino modelo → exercícios
 
 ### exercicio
 
-Catálogo de exercícios, carregado inicialmente da Free Exercise DB (domínio público, com imagens estáticas) traduzida para o português; GIFs ficam para versões futuras, usando o mesmo campo `midia_uri`. `usuario_id` nulo = exercício padrão do app, preenchido = criado pelo usuário.
+Catálogo de exercícios: cerca de 60 exercícios padrão em português, que vêm com o app, mais os criados pelo usuário. Imagens e GIFs ficam para versões futuras, usando o campo `midia_uri`. `usuario_id` nulo = exercício padrão do app, preenchido = criado pelo usuário.
 
 | Campo | Tipo | Regras | Req. |
 | --- | --- | --- | --- |
@@ -166,6 +166,7 @@ Exercício previsto em um treino modelo. Um aeróbico previsto também entra aqu
 | series_previstas | INTEGER | > 0 | RF04 |
 | reps_min / reps_max | INTEGER | iguais quando a faixa é fixa (ex.: 10) | RF04 |
 | carga_prevista_kg | REAL | opcional | RF04 |
+| duracao_prevista_min | REAL | só para aeróbico; opcional | RF24 |
 | observacao | TEXT | opcional | — |
 
 ### sessao_treino
@@ -176,7 +177,10 @@ Um treino realizado. Pode seguir um treino do plano ou ser livre, sem plano; aer
 | --- | --- | --- | --- |
 | id | TEXT (UUID) | PK | — |
 | treino_modelo_id | TEXT | FK → treino_modelo; nulo = treino livre | RF08 |
-| inicio / fim | TEXT (data-hora) | fim ≥ início | RF08, RF10 |
+| inicio / fim | TEXT (data-hora) | fim ≥ início; fim nulo enquanto não for finalizada | RF08, RF10 |
+| status | TEXT | `em_andamento`, `pausada`, `concluida`, `parcial` | RF65, RF66, RN22, RN23 |
+| pausada_em | TEXT (data-hora) | preenchido quando status = pausada | RF66, RN23 |
+| segundos_pausada | INTEGER | soma das pausas, descontada da duração | RF66 |
 | calorias_gastas_kcal | INTEGER | estimada (METs) ou importada | RF46, RN11 |
 | origem_gasto | TEXT | `estimativa`, `integracao` | RN11 |
 
@@ -187,6 +191,7 @@ Um treino realizado. Pode seguir um treino do plano ou ser livre, sem plano; aer
 | id | TEXT (UUID) | PK | — |
 | sessao_treino_id | TEXT | FK → sessao_treino | RF09 |
 | exercicio_id | TEXT | FK → exercicio | RF09 |
+| treino_modelo_item_id | TEXT | FK → treino_modelo_item; liga ao previsto (séries e repetições); nulo em treino livre | RF09, RN02 |
 | ordem | INTEGER | posição na sessão | RF09 |
 
 ### serie
@@ -238,6 +243,7 @@ Os quatro tipos de meta ficam numa única tabela, com as colunas específicas de
 | treinos_semana | INTEGER | tipo = frequencia; ao menos um dos dois preenchido | RF29, RN07 |
 | aerobicos_semana | INTEGER | tipo = frequencia | RF29, RN07 |
 | peso_alvo_kg | REAL | obrigatório só se tipo = peso | RF30 |
+| peso_inicial_kg | REAL | peso atual na criação da meta; base do progresso | RF30 |
 | dias_dieta_alvo | INTEGER | obrigatório só se tipo = dieta | RF32, RN10 |
 | data_inicio | TEXT (data) | obrigatório | RF12 |
 | prazo | TEXT (data) | opcional | RF12 |
@@ -258,17 +264,19 @@ Catálogo fixo, carregado com o app.
 | nome | TEXT | ex.: "Proteína" | RF34 |
 | unidade | TEXT | `kcal`, `g`, `mg`, `mcg` | RF34 |
 | categoria | TEXT | `energia`, `macro`, `micro` | RF34 |
+| recomendado_dia | REAL | valor diário de referência para adultos (ANVISA, IN 75/2020); nulo para energia e macros | RF34 |
+| ordem | INTEGER | ordem de exibição | — |
 
 ### alimento
 
-`usuario_id` nulo = alimento da TBCA (compartilhado); preenchido = adicionado pelo usuário.
+`usuario_id` nulo = alimento da base do app (compartilhado); preenchido = adicionado pelo usuário. Até a TBCA ser embarcada, a base do app traz cerca de 55 alimentos comuns com valores aproximados (fonte `base_app`).
 
 | Campo | Tipo | Regras | Req. |
 | --- | --- | --- | --- |
 | id | TEXT (UUID) | PK | — |
 | nome | TEXT | obrigatório | RF14 |
 | marca | TEXT | opcional | RF38 |
-| fonte | TEXT | `tbca`, `open_food_facts`, `rotulo`, `manual` | RNF06, RF38–RF40 |
+| fonte | TEXT | `tbca`, `base_app`, `open_food_facts`, `rotulo`, `manual` | RNF06, RF38–RF40 |
 | codigo_tbca | TEXT | único quando fonte = tbca | RNF06 |
 | codigo_barras | TEXT | único quando presente | RF38 |
 | porcao_padrao_g | REAL | opcional | RF14 |
@@ -384,6 +392,15 @@ Energia ativa do dia medida pelo relógio (passos, caminhadas, treinos), importa
 | energia_ativa_kcal | INTEGER | ≥ 0; não inclui o metabolismo basal | RF45 |
 | origem | TEXT | `apple_saude`, `health_connect` | RF44 |
 | sincronizado_em | TEXT (data-hora) | última atualização do valor | RF44 |
+
+### preferencia
+
+Preferências locais do aparelho, em chave e valor (tema, consentimento da LGPD e do ciclo). Não tem `usuario_id` nem auditoria e não sobe para a nuvem.
+
+| Campo | Tipo | Regras | Req. |
+| --- | --- | --- | --- |
+| chave | TEXT | PK; ex.: `tema`, `consentimento`, `consentimento_ciclo` | RNF03, RNF10 |
+| valor | TEXT | `claro`/`escuro` (nulo = automático); data-hora do consentimento; `0`/`1` | RNF03, RNF10 |
 
 ## Dados calculados, não armazenados
 

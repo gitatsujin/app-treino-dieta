@@ -1,6 +1,6 @@
 # Escopo do App de Treino e Dieta
 
-Atualizado em 16/10/2026.
+Atualizado em 17/10/2026.
 
 ## Visão geral
 
@@ -64,6 +64,8 @@ O app tem dois temas, definidos após testes no Figma (16/10/2026): o claro segu
 - **RF09** — Para cada série realizada, o usuário deve poder registrar a carga (kg) e o número de repetições.
 - **RF10** — O app deve manter o histórico de todos os treinos realizados, com data, exercícios, séries, cargas e repetições.
 - **RF11** — Durante o registro de um exercício, o app deve exibir a carga e as repetições da última vez em que ele foi feito.
+- **RF65** — O progresso de um treino em andamento deve ser salvo automaticamente a cada série marcada como feita.
+- **RF66** — O usuário deve poder sair de um treino no meio, escolhendo entre pausar (para continuar depois de onde parou) ou finalizar com o que já foi feito.
 
 #### Aeróbicos (dentro de Treino)
 
@@ -111,6 +113,7 @@ O app tem dois temas, definidos após testes no Figma (16/10/2026): o claro segu
 
 - **RF22** — A tela Início terá seu conteúdo definido na etapa de design (Figma).
 - **RF23** — A tela Perfil deve exibir e permitir editar os dados do usuário: peso, altura, idade e sexo.
+- **RF67** — O usuário deve poder exportar seus dados (treinos, dieta, medidas, metas e, se ativado, ciclo menstrual) em planilha CSV ou arquivo JSON, escolhendo o período, e salvar ou compartilhar o arquivo pelo próprio celular (portabilidade, LGPD).
 - **RF41** — O Perfil deve ter uma aba de Bioimpedância, onde o usuário registra os resultados de cada exame com data.
 - **RF42** — A aba de Bioimpedância deve exibir o histórico de todos os exames registrados, com a evolução de cada medida.
 - **RF43** — O app deve calcular a taxa metabólica basal (TMB) do usuário, usada no gasto calórico do dia.
@@ -175,6 +178,8 @@ As notificações ficam fora do MVP e entram numa versão posterior.
 - **RN19** — A circunferência da cintura é exibida sem classificação.
 - **RN20** — Os dados do ciclo menstrual são visíveis apenas para a usuária. Num futuro compartilhamento com personal ou nutricionista, eles exigem consentimento separado dos demais dados.
 - **RN21** — As mensagens sobre o ciclo são apenas sugestões gerais de cuidado: não indicam cargas, percentuais de redução nem fazem afirmações médicas.
+- **RN22** — Sair de um treino nunca apaga séries já feitas. Um treino pausado aparece na tela Início e na aba Treino com as opções de continuar ou finalizar.
+- **RN23** — Um treino pausado fica disponível até o fim do dia. Depois disso, o app o finaliza automaticamente com as séries feitas, e ele entra no histórico marcado como parcial.
 
 #### Classificação do % de gordura corporal
 
@@ -204,7 +209,7 @@ Ficam para o lançamento, depois do MVP:
 
 - Conta de usuário, login e sincronização dos dados na nuvem.
 - Sistema de notificações e alertas (RF56–RF63).
-- GIFs de demonstração dos exercícios (o MVP usa as imagens estáticas da Free Exercise DB).
+- Imagens e GIFs de demonstração dos exercícios (o MVP mostra só o nome, o grupo muscular e o equipamento).
 
 Ideias futuras:
 
