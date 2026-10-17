@@ -10,7 +10,8 @@ import { font, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
 const FONTES: [LucideIcon, 'diet' | 'training' | 'neutral', string, string][] = [
-  [Utensils, 'diet', 'Base de alimentos do app', 'Valores aproximados de tabelas brasileiras (TACO e TBCA) e da USDA'],
+  [Utensils, 'diet', 'TACO', 'Tabela Brasileira de Composição de Alimentos, 4ª ed. revisada e ampliada · NEPA/UNICAMP, 2011'],
+  [Utensils, 'diet', 'Complementos da base', 'Alguns itens sem equivalente na TACO (ex.: whey), com valores médios de rótulos'],
   [Barcode, 'diet', 'Open Food Facts', 'Produtos por código de barras · licença ODbL'],
   [Halter, 'training', 'Exercícios', 'Catálogo próprio do app'],
   [Flame, 'training', 'Compendium of Physical Activities', 'Valores de MET para estimar o gasto'],

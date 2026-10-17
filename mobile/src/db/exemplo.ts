@@ -87,21 +87,21 @@ export function carregarExemplo() {
       salvarDieta({
         nome: 'Plano Hipertrofia',
         refeicoes: [
-          { nome: 'Café da manhã', horario: '07:30', itens: [{ alimento_id: 'al-pao-integral', quantidade_g: 50 }, { alimento_id: 'al-ovo-mexido', quantidade_g: 100 }, { alimento_id: 'al-leite-integral', quantidade_g: 200 }] },
-          { nome: 'Lanche da manhã', horario: '10:00', itens: [{ alimento_id: 'al-whey', quantidade_g: 30 }, { alimento_id: 'al-banana', quantidade_g: 90 }, { alimento_id: 'al-pasta-amendoim', quantidade_g: 15 }] },
+          { nome: 'Café da manhã', horario: '07:30', itens: [{ alimento_id: 'taco-52', quantidade_g: 50 }, { alimento_id: 'al-ovo-mexido', quantidade_g: 100 }, { alimento_id: 'taco-458', quantidade_g: 200 }] },
+          { nome: 'Lanche da manhã', horario: '10:00', itens: [{ alimento_id: 'al-whey', quantidade_g: 30 }, { alimento_id: 'taco-182', quantidade_g: 90 }, { alimento_id: 'al-pasta-amendoim', quantidade_g: 15 }] },
           {
             nome: 'Almoço',
             horario: '12:30',
             itens: [
-              { alimento_id: 'al-arroz-integral', quantidade_g: 150 },
-              { alimento_id: 'al-feijao-carioca', quantidade_g: 100 },
-              { alimento_id: 'al-frango-peito', quantidade_g: 150 },
-              { alimento_id: 'al-alface', quantidade_g: 30 },
-              { alimento_id: 'al-azeite', quantidade_g: 8 },
+              { alimento_id: 'taco-1', quantidade_g: 150 },
+              { alimento_id: 'taco-561', quantidade_g: 100 },
+              { alimento_id: 'taco-410', quantidade_g: 150 },
+              { alimento_id: 'taco-78', quantidade_g: 30 },
+              { alimento_id: 'taco-260', quantidade_g: 8 },
             ],
           },
-          { nome: 'Lanche da tarde', horario: '16:00', itens: [{ alimento_id: 'al-iogurte-natural', quantidade_g: 170 }, { alimento_id: 'al-aveia', quantidade_g: 30 }, { alimento_id: 'al-banana', quantidade_g: 90 }] },
-          { nome: 'Jantar', horario: '20:00', itens: [{ alimento_id: 'al-batata-doce', quantidade_g: 200 }, { alimento_id: 'al-tilapia', quantidade_g: 150 }, { alimento_id: 'al-legumes', quantidade_g: 100 }] },
+          { nome: 'Lanche da tarde', horario: '16:00', itens: [{ alimento_id: 'taco-448', quantidade_g: 170 }, { alimento_id: 'taco-7', quantidade_g: 30 }, { alimento_id: 'taco-182', quantidade_g: 90 }] },
+          { nome: 'Jantar', horario: '20:00', itens: [{ alimento_id: 'taco-88', quantidade_g: 200 }, { alimento_id: 'al-tilapia', quantidade_g: 150 }, { alimento_id: 'taco-100', quantidade_g: 100 }] },
         ],
       });
     }
@@ -114,7 +114,7 @@ export function carregarExemplo() {
         if (d % 4 === 0 && ri === 3) return; // alguns dias pula o lanche (fora da margem)
         for (const i of r.itens) inserir('consumo', { data, horario: r.horario, refeicao_modelo_item_id: i.id, refeicao_nome: r.nome, alimento_id: i.alimento_id, quantidade_g: i.quantidade_g });
       });
-      if (d % 3 === 0) inserir('consumo', { data, horario: '15:10', refeicao_nome: null, alimento_id: 'al-chocolate', quantidade_g: 25 });
+      if (d % 3 === 0) inserir('consumo', { data, horario: '15:10', refeicao_nome: null, alimento_id: 'taco-495', quantidade_g: 25 });
     }
     definirMetaCalorias(null);
 

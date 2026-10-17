@@ -288,4 +288,26 @@ CREATE TABLE preferencia (
 );
 `;
 
-export const MIGRACOES: string[] = [V1];
+/** V2: alimentos da TACO (fonte 'taco'). O SQLite não altera CHECK, então a tabela é recriada. */
+const V2 = `
+CREATE TABLE alimento_novo (
+  id TEXT PRIMARY KEY,
+  usuario_id TEXT,
+  nome TEXT NOT NULL,
+  marca TEXT,
+  fonte TEXT NOT NULL CHECK (fonte IN ('tbca','taco','base_app','open_food_facts','rotulo','manual')),
+  codigo_tbca TEXT UNIQUE,
+  codigo_barras TEXT UNIQUE,
+  porcao_padrao_g REAL,
+  medida_caseira TEXT,
+  categoria TEXT,
+  ${AUD}
+);
+INSERT INTO alimento_novo (id, usuario_id, nome, marca, fonte, codigo_tbca, codigo_barras, porcao_padrao_g, medida_caseira, criado_em, atualizado_em, excluido_em)
+  SELECT id, usuario_id, nome, marca, fonte, codigo_tbca, codigo_barras, porcao_padrao_g, medida_caseira, criado_em, atualizado_em, excluido_em FROM alimento;
+DROP TABLE alimento;
+ALTER TABLE alimento_novo RENAME TO alimento;
+CREATE INDEX ix_alimento_nome ON alimento(nome);
+`;
+
+export const MIGRACOES: string[] = [V1, V2];

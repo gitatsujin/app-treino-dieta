@@ -269,14 +269,15 @@ Catálogo fixo, carregado com o app.
 
 ### alimento
 
-`usuario_id` nulo = alimento da base do app (compartilhado); preenchido = adicionado pelo usuário. Até a TBCA ser embarcada, a base do app traz cerca de 55 alimentos comuns com valores aproximados (fonte `base_app`).
+`usuario_id` nulo = alimento da base do app (compartilhado); preenchido = adicionado pelo usuário. No MVP, a base vem da TACO 4ª edição (597 alimentos, fonte `taco`, id `taco-<número na TACO>`); alguns itens sem equivalente na TACO (whey, peito de peru, granola…) ficam como `base_app`. A TBCA entra quando for autorizada.
 
 | Campo | Tipo | Regras | Req. |
 | --- | --- | --- | --- |
 | id | TEXT (UUID) | PK | — |
 | nome | TEXT | obrigatório | RF14 |
 | marca | TEXT | opcional | RF38 |
-| fonte | TEXT | `tbca`, `base_app`, `open_food_facts`, `rotulo`, `manual` | RNF06, RF38–RF40 |
+| fonte | TEXT | `tbca`, `taco`, `base_app`, `open_food_facts`, `rotulo`, `manual` | RNF06, RF38–RF40 |
+| categoria | TEXT | grupo da tabela de origem (ex.: "Frutas e derivados"); opcional | RNF06 |
 | codigo_tbca | TEXT | único quando fonte = tbca | RNF06 |
 | codigo_barras | TEXT | único quando presente | RF38 |
 | porcao_padrao_g | REAL | opcional | RF14 |

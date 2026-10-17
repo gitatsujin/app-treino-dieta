@@ -1,3 +1,17 @@
+/** Aumente quando mudar qualquer semente, para o app regravar na próxima abertura. */
+export const VERSAO_SEMENTES = 2;
+
+/**
+ * Base inicial que a TACO substituiu (ficam ocultos na busca). Os demais itens de ALIMENTOS
+ * continuam como complemento, porque a TACO não tem equivalente (whey, peito de peru, granola…).
+ */
+export const ALIMENTOS_OCULTOS = [
+  'arroz-branco', 'arroz-integral', 'feijao-carioca', 'feijao-preto', 'macarrao', 'cuscuz', 'batata-doce', 'batata-inglesa', 'mandioca', 'pao-frances',
+  'pao-integral', 'aveia', 'frango-peito', 'frango-coxa', 'patinho', 'carne-moida', 'salmao', 'ovo-cozido', 'ovo-frito', 'presunto', 'leite-integral',
+  'leite-desnatado', 'iogurte-natural', 'queijo-minas', 'mucarela', 'requeijao', 'manteiga', 'azeite', 'castanha-para', 'banana', 'maca', 'laranja',
+  'mamao', 'morango', 'abacaxi', 'melancia', 'abacate', 'alface', 'tomate', 'brocolis', 'cenoura', 'legumes', 'cafe', 'acucar', 'mel', 'chocolate',
+];
+
 /**
  * Dados que já vêm com o app: catálogo de nutrientes, exercícios e uma base inicial de alimentos.
  *

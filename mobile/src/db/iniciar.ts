@@ -1,10 +1,12 @@
 import { agoraIso, definirDb, type Db } from './conexao';
 import { MIGRACOES } from './esquema';
-import { ALIMENTOS, EXERCICIOS, MAPA_NUT, NUTRIENTES } from './sementes';
+import { ALIMENTOS, ALIMENTOS_OCULTOS, EXERCICIOS, MAPA_NUT, NUTRIENTES, VERSAO_SEMENTES } from './sementes';
+import TACO from './taco.json';
 
 /** Aplica as migrações pendentes e carrega os dados padrão. Idempotente. */
 export function iniciarBanco(db: Db) {
-  db.exec('PRAGMA foreign_keys = ON;');
+  // Chaves estrangeiras desligadas durante as migrações (recriar tabela não pode cascatear).
+  db.exec('PRAGMA foreign_keys = OFF;');
   const v = db.get<{ user_version: number }>('PRAGMA user_version')?.user_version ?? 0;
   for (let i = v; i < MIGRACOES.length; i++) {
     db.tx(() => {
@@ -12,7 +14,13 @@ export function iniciarBanco(db: Db) {
       db.exec(`PRAGMA user_version = ${i + 1}`);
     });
   }
-  semear(db);
+  db.exec('PRAGMA foreign_keys = ON;');
+  // As sementes só rodam quando mudam (cerca de 11 mil linhas com a TACO).
+  const versao = db.get<{ valor: string }>("SELECT valor FROM preferencia WHERE chave = 'versao_sementes'")?.valor;
+  if (versao !== String(VERSAO_SEMENTES)) {
+    semear(db);
+    db.run("INSERT INTO preferencia (chave, valor) VALUES ('versao_sementes', ?) ON CONFLICT(chave) DO UPDATE SET valor = excluded.valor", [String(VERSAO_SEMENTES)]);
+  }
   definirDb(db);
 }
 
@@ -39,6 +47,23 @@ function semear(db: Db) {
       for (const [k, v] of Object.entries(nut)) {
         db.run('INSERT OR IGNORE INTO alimento_nutriente (alimento_id, nutriente_id, valor_por_100g) VALUES (?,?,?)', [id, MAPA_NUT[k as keyof typeof MAPA_NUT], v as number]);
       }
+    }
+    // Alimentos da base inicial que a TACO substitui: somem da busca, mas registros antigos continuam válidos.
+    for (const slug of ALIMENTOS_OCULTOS) db.run('UPDATE alimento SET excluido_em = ? WHERE id = ? AND excluido_em IS NULL', [agora, `al-${slug}`]);
+
+    // TACO 4ª edição (NEPA/UNICAMP): valores por 100 g; "Tr" (traço) = 0; sem dado = sem linha.
+    const { nutrientes, categorias, alimentos } = TACO as unknown as { nutrientes: string[]; categorias: string[]; alimentos: [number, string, number, (number | null)[]][] };
+    for (const [n, nome, cat, valores] of alimentos) {
+      const id = `taco-${n}`;
+      db.run(
+        `INSERT INTO alimento (id, usuario_id, nome, fonte, categoria, criado_em, atualizado_em) VALUES (?, NULL, ?, 'taco', ?, ?, ?)
+         ON CONFLICT(id) DO UPDATE SET nome = excluded.nome, categoria = excluded.categoria, atualizado_em = excluded.atualizado_em`,
+        [id, nome, categorias[cat], agora, agora],
+      );
+      valores.forEach((v, i) => {
+        if (v == null) return;
+        db.run('INSERT INTO alimento_nutriente (alimento_id, nutriente_id, valor_por_100g) VALUES (?,?,?) ON CONFLICT DO UPDATE SET valor_por_100g = excluded.valor_por_100g', [id, nutrientes[i], v]);
+      });
     }
   });
 }

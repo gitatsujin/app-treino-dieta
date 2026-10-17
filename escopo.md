@@ -151,7 +151,7 @@ As notificações ficam fora do MVP e entram numa versão posterior.
 - **RNF03** — Os dados de saúde são dados sensíveis pela LGPD: o app deve pedir consentimento explícito, ter política de privacidade e permitir que o usuário exclua seus dados.
 - **RNF04** — Imagens e PDFs enviados para importação devem ser tratados com a mesma proteção dos demais dados de saúde.
 - **RNF05** — No MVP, todos os dados ficam armazenados apenas no aparelho, sem conta nem login.
-- **RNF06** — A base de alimentos deve usar a TBCA (Tabela Brasileira de Composição de Alimentos, FoRC/USP) como fonte principal, embarcada no app para funcionar offline. Produtos de marca que não estão na TBCA são cobertos por código de barras e leitura da tabela nutricional (RF38–RF40).
+- **RNF06** — A base de alimentos deve funcionar offline, embarcada no app. No MVP, a fonte principal é a TACO (Tabela Brasileira de Composição de Alimentos, 4ª ed., NEPA/UNICAMP), cuja reprodução é permitida com citação da fonte. A TBCA (FoRC/USP) entra quando houver autorização dos coordenadores para uso comercial. Produtos de marca são cobertos por código de barras e leitura da tabela nutricional (RF38–RF40).
 - **RNF07** — A arquitetura de dados deve permitir migrar os dados locais para uma conta na nuvem no lançamento, sem perda de histórico.
 - **RNF08 a RNF11** — Ver [Identidade visual](#identidade-visual).
 
@@ -168,7 +168,7 @@ As notificações ficam fora do MVP e entram numa versão posterior.
 - **RN09** — Quando o usuário atualiza o peso (no Perfil, numa pesagem ou numa bioimpedância), a TMB calculada por fórmula é recalculada.
 - **RN10** — Um dia conta como "dieta seguida à risca" quando as calorias consumidas ficam dentro de ±7% da meta diária da dieta. A margem vale apenas para as calorias; os macronutrientes não entram nesse critério.
 - **RN11** — Gasto de atividades: quando há dado importado do Apple Saúde/Health Connect, ele tem prioridade sobre a estimativa do app.
-- **RN12** — Os dados da TBCA podem ser embarcados no app (termos de uso confirmados).
+- **RN12** — Os dados da TBCA só podem ser embarcados com autorização dos coordenadores, pois o site proíbe reprodução e uso comercial sem contato prévio. Pedido enviado em 17/10/2026; até a resposta, o app usa a TACO.
 - **RN13** — Duplicidade de atividade: quando uma sessão registrada no app tem horário sobreposto a uma sessão vinda do relógio, o app grava os dados do relógio e pergunta ao usuário se deseja sobrescrevê-los com o que ele registrou. Só se o usuário confirmar, os dados dele substituem os do relógio.
 - **RN14** — O valor de metabolismo em repouso da bioimpedância é a TMB usada pela RN08.
 - **RN15** — IMC = peso (kg) ÷ altura (m)², classificado pela OMS: abaixo de 18,5 = abaixo do peso; 18,5 a 24,9 = normal; 25 a 29,9 = sobrepeso; 30 ou mais = obeso.

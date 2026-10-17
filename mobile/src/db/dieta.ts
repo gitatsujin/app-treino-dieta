@@ -19,7 +19,7 @@ export type Alimento = {
   id: string;
   nome: string;
   marca: string | null;
-  fonte: 'tbca' | 'base_app' | 'open_food_facts' | 'rotulo' | 'manual';
+  fonte: 'tbca' | 'taco' | 'base_app' | 'open_food_facts' | 'rotulo' | 'manual';
   codigo_barras: string | null;
   porcao_padrao_g: number | null;
   medida_caseira: string | null;
@@ -28,6 +28,7 @@ export type Alimento = {
 
 export const FONTES: Record<Alimento['fonte'], string> = {
   tbca: 'TBCA',
+  taco: 'TACO',
   base_app: 'Base do app',
   open_food_facts: 'Código de barras',
   rotulo: 'Rótulo',
