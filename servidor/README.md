@@ -6,6 +6,8 @@ e devolve os dados estruturados. O app sempre mostra o resultado para revisão a
 - `GET /saude`: diz se o servidor está no ar, se a chave do app confere e quais IAs têm chave (nunca as chaves).
 - `POST /ler`: `{ alvo, provedor, mime, base64 }` com o cabeçalho `x-chave-app`. Limite de 15 MB.
 - Provedores: `claude` (Anthropic), `gemini` (Google), `openai` (OpenAI). O arquivo não é guardado.
+- Plano B automático: se a IA escolhida estiver sobrecarregada, o servidor tenta de novo, depois o modelo de
+  reserva (`MODELO_*_RESERVA`) e por fim as outras IAs com chave. A resposta diz qual IA leu (`provedor`).
 
 ## Publicar (uma vez)
 
@@ -25,7 +27,7 @@ cole o endereço e a CHAVE_APP e toque em "Salvar e testar conexão".
 
 ## Trocar o modelo
 
-Os modelos ficam em `wrangler.toml` (`MODELO_CLAUDE`, `MODELO_GEMINI`, `MODELO_OPENAI`). Edite e rode `npx wrangler deploy`.
+Os modelos ficam em `wrangler.toml` (`MODELO_CLAUDE`, `MODELO_GEMINI`, `MODELO_OPENAI` e os `_RESERVA`). Edite e rode `npx wrangler deploy`.
 
 ## Regras
 

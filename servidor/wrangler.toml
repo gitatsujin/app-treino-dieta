@@ -1,12 +1,18 @@
 name = "treino-dieta-leitura"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
+workers_dev = true
+preview_urls = false
 
 # Modelos de cada IA (opcional). Para trocar, edite aqui e rode `npx wrangler deploy` de novo.
 [vars]
 MODELO_CLAUDE = "claude-sonnet-5-5"
 MODELO_GEMINI = "gemini-3.8-flash"
 MODELO_OPENAI = "gpt-6.1-sol"
+# Reserva: usados quando o principal está sobrecarregado.
+MODELO_CLAUDE_RESERVA = "claude-haiku-5-5"
+MODELO_GEMINI_RESERVA = "gemini-3.6-flash"
+MODELO_OPENAI_RESERVA = "gpt-6-luna"
 
 # Segredos (NUNCA escreva aqui): configure com `npx wrangler secret put NOME`
 #   CHAVE_APP, ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY

@@ -43,8 +43,9 @@ export default {
 
     const inicio = Date.now();
     try {
-      const { dados, modelo } = await ler(provedor, alvo, { mime, base64 }, env);
-      return resposta({ ok: true, provedor, modelo, ms: Date.now() - inicio, dados });
+      const r = await ler(provedor, alvo, { mime, base64 }, env);
+      if (r.tentativas.length) console.warn('plano B', alvo, r.tentativas);
+      return resposta({ ok: true, provedor: r.provedor, modelo: r.modelo, pedido: provedor, ms: Date.now() - inicio, dados: r.dados });
     } catch (e) {
       console.error(provedor, alvo, String(e));
       return resposta({ erro: 'A leitura falhou', detalhe: String(e).slice(0, 300), provedor }, 502);

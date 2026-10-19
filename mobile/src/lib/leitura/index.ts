@@ -87,7 +87,7 @@ async function lerComIA<A extends Alvo>(alvo: A, a: Arquivo): Promise<{ dados: L
   const arq = await prepararImagem(a);
   const base64 = await new File(arq.uri).base64();
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 90_000);
+  const t = setTimeout(() => ctrl.abort(), 120_000);
   try {
     const r = await fetch(`${cfg.url}/ler`, {
       method: 'POST',
@@ -95,12 +95,29 @@ async function lerComIA<A extends Alvo>(alvo: A, a: Arquivo): Promise<{ dados: L
       body: JSON.stringify({ alvo, provedor: cfg.provedor, mime: arq.mime, base64 }),
       signal: ctrl.signal,
     });
-    const j = (await r.json()) as { ok?: boolean; dados?: Lido[A]; modelo?: string; erro?: string; detalhe?: string };
-    if (!r.ok || !j.dados) throw new Error(j.erro ? `${j.erro}${j.detalhe ? `: ${j.detalhe}` : ''}` : `Servidor respondeu ${r.status}`);
-    return { dados: j.dados, provedor: cfg.provedor, modelo: j.modelo ?? '' };
+    const j = (await r.json()) as { ok?: boolean; dados?: Lido[A]; modelo?: string; provedor?: Provedor; erro?: string; detalhe?: string };
+    if (!r.ok || !j.dados) throw new Error(explicarErro(r.status, j.erro, j.detalhe, cfg.provedor));
+    // Se a IA escolhida estava fora, o servidor usa outra com chave e diz qual foi.
+    return { dados: j.dados, provedor: j.provedor ?? cfg.provedor, modelo: j.modelo ?? '' };
   } finally {
     clearTimeout(t);
   }
+}
+
+/** Traduz a resposta de erro do servidor/IA para uma frase que o usuário entende. */
+export function explicarErro(status: number, erro?: string, detalhe?: string, provedor?: Provedor): string {
+  const ia = provedor ? PROVEDORES[provedor].split(' (')[0] : 'IA';
+  const empresa = provedor ? (PROVEDORES[provedor].match(/\((.+)\)/)?.[1] ?? ia) : 'fornecedor';
+  const d = detalhe ?? '';
+  if (status === 401) return 'A chave do app não confere com a do servidor (Perfil › Leitura de arquivos).';
+  if (/n[ãa]o configurada/i.test(d)) return `O servidor não tem a chave do ${ia}. Escolha outra IA em Perfil › Leitura de arquivos.`;
+  if (/insufficient_quota|credit|billing|exceeded your current quota/i.test(d)) return `A conta do ${ia} está sem créditos. Adicione créditos na conta da ${empresa} ou escolha outra IA em Perfil › Leitura de arquivos.`;
+  if (/\b429\b|rate.?limit|RESOURCE_EXHAUSTED/i.test(d)) return `O ${ia} recebeu pedidos demais agora. Espere um minuto e tente de novo.`;
+  if (/\b5(0[0-4]|29)\b|high demand|overloaded|UNAVAILABLE/i.test(d)) return `As IAs configuradas estão sobrecarregadas agora (problema passageiro do ${empresa}). Tente de novo em alguns minutos.`;
+  if (/\b40[13]\b|invalid.?api.?key|API key not valid|authentication/i.test(d)) return `A chave do ${ia} no servidor é inválida. Confira com wrangler secret put.`;
+  if (/\b404\b|model.*(not.?found|does not exist)|not found for API/i.test(d)) return `O modelo do ${ia} configurado no servidor não está disponível para a sua conta.`;
+  if (status === 413) return erro ?? 'Arquivo grande demais (máximo 15 MB).';
+  return erro ? `${erro}${d ? ` (${d.slice(0, 160)})` : ''}` : `Servidor respondeu ${status}`;
 }
 
 /* ---------- Leitura no aparelho (sem internet) ---------- */
@@ -170,7 +187,15 @@ export async function lerArquivo<A extends Alvo>(alvo: A, original: Arquivo): Pr
     gravar(() => atualizar('importacao', id, { status: 'erro', arquivo_uri: arquivo.uri, resultado_json: JSON.stringify({ erros }) }));
     const conhecida = erros.map((e) => MENSAGENS[e]).find(Boolean);
     const outra = erros.find((e) => !MENSAGENS[e]);
-    throw new ErroLeitura(outra ? `Não foi possível ler o arquivo. ${outra.includes('Network') || outra.includes('abort') ? 'Verifique a internet.' : outra}` : (conhecida ?? 'Não foi possível ler o arquivo.'));
+    throw new ErroLeitura(
+      outra
+        ? /abort|cancel/i.test(outra)
+          ? 'A leitura demorou demais (as IAs podem estar sobrecarregadas). Tente de novo em alguns minutos.'
+          : /Network|fetch failed/i.test(outra)
+            ? 'Não foi possível falar com o servidor de leitura. Verifique a internet.'
+            : outra
+        : (conhecida ?? 'Não foi possível ler o arquivo.'),
+    );
   }
   gravar(() => atualizar('importacao', id, { status: 'aguardando_revisao', arquivo_uri: arquivo.uri, resultado_json: JSON.stringify(resultado) }));
   return { ...resultado, alvo, arquivo, importacaoId: id } as Leitura<A>;
