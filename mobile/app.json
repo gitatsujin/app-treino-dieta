@@ -8,7 +8,12 @@
     "scheme": "treinodieta",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.brennosoares.treinodieta",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +22,16 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.brennosoares.treinodieta",
+      "permissions": [
+        "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.READ_WEIGHT",
+        "android.permission.health.READ_HEART_RATE",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.READ_MENSTRUATION"
+      ]
     },
     "web": {
       "output": "server",
@@ -25,6 +39,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/sem-sandbox-de-scripts",
       [
         "expo-splash-screen",
         {
@@ -49,11 +64,45 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app usa suas fotos para ler fichas de treino, dietas, laudos e tabelas nutricionais que você escolher.",
+          "cameraPermission": "O app usa a câmera para fotografar fichas de treino, dietas, laudos e tabelas nutricionais, e para ler códigos de barras.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "enableSceneSupport": true
+          },
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "O Treino e Dieta lê seus treinos, a energia ativa, o peso e, se você ativar, o ciclo menstrual do Apple Saúde para calcular o gasto do dia e completar o histórico.",
+          "NSHealthUpdateUsageDescription": false,
+          "background": false
+        }
+      ],
+      "react-native-health-connect"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "leitura": {
+        "url": "",
+        "chave": ""
+      }
     }
   }
 }

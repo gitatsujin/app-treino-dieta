@@ -8,11 +8,14 @@ import {
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { LucideProvider } from 'lucide-react-native';
 import { useEffect } from 'react';
 
 import { abrirBancoDoAparelho } from '@/db/expo';
 import { fecharSessoesAntigas } from '@/db/treino';
+import { useSincronizacaoSaude } from '@/lib/saude';
+import { BarraTeclado } from '@/components/ui/Teclado';
 import { useTheme } from '@/theme/use-theme';
 
 SplashScreen.preventAutoHideAsync();
@@ -24,6 +27,8 @@ fecharSessoesAntigas();
 export default function RootLayout() {
   const { colors, scheme } = useTheme();
   const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
+  // Apple Saúde / Health Connect: lê o relógio ao abrir e ao voltar para o app.
+  useSincronizacaoSaude(true);
 
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync();
@@ -38,6 +43,7 @@ export default function RootLayout() {
   };
 
   return (
+    <KeyboardProvider>
     <LucideProvider strokeWidth={2.5}>
     <ThemeProvider value={navTheme}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
@@ -56,7 +62,9 @@ export default function RootLayout() {
         {/* Sair do treino só pelo X (pausar ou finalizar), nunca por gesto. */}
         <Stack.Screen name="treino/andamento" options={{ gestureEnabled: false }} />
       </Stack>
+      <BarraTeclado />
     </ThemeProvider>
     </LucideProvider>
+    </KeyboardProvider>
   );
 }

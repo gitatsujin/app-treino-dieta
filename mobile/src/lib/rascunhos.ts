@@ -11,9 +11,11 @@ export type ItemRascunho = {
   reps: string;
   carga: string;
   duracao: string;
+  /** Veio de uma importação com leitura incerta: destacar para o usuário conferir. */
+  revisar?: boolean;
 };
 export type TreinoRascunho = { chave: string; id?: string; nome: string; itens: ItemRascunho[] };
-export type PlanoRascunho = { nome: string; treinos: TreinoRascunho[]; atual: number };
+export type PlanoRascunho = { nome: string; treinos: TreinoRascunho[]; atual: number; importacao?: { id: string; via: string } };
 
 export const rascunhoPlano = criarRascunho<PlanoRascunho | null>(null);
 
@@ -21,9 +23,9 @@ export const rascunhoPlano = criarRascunho<PlanoRascunho | null>(null);
 export const exercicioDaMeta = criarRascunho<{ id: string; nome: string } | null>(null);
 
 /** Refeição da dieta em edição. */
-export type ItemDietaRascunho = { chave: string; alimento_id: string; nome: string; gramas: string; kcal100: number };
+export type ItemDietaRascunho = { chave: string; alimento_id: string; nome: string; gramas: string; kcal100: number; lido?: string; revisar?: boolean };
 export type RefeicaoRascunho = { chave: string; id?: string; nome: string; horario: string; itens: ItemDietaRascunho[] };
-export type DietaRascunho = { nome: string; refeicoes: RefeicaoRascunho[]; atual: number };
+export type DietaRascunho = { nome: string; refeicoes: RefeicaoRascunho[]; atual: number; importacao?: { id: string; via: string }; naoEncontrados?: string[] };
 export const rascunhoDieta = criarRascunho<DietaRascunho | null>(null);
 
 let n = 0;
@@ -43,3 +45,10 @@ export const exercicioCriado = criarRascunho<{ id: string; nome: string } | null
 
 /** Alimento recém-cadastrado: a tela de adicionar o seleciona ao voltar. */
 export const alimentoCriado = criarRascunho<string | null>(null);
+
+/** Arquivo escolhido na origem da importação, à espera da leitura. */
+export const arquivoEscolhido = criarRascunho<{ alvo: 'treino' | 'dieta' | 'bio' | 'rotulo'; arquivo: { uri: string; mime: string; nome: string }; params?: Record<string, string> } | null>(null);
+
+/** Laudo e rótulo lidos: preenchem os formulários de bioimpedância e de novo alimento. */
+export const bioLida = criarRascunho<{ importacaoId: string; via: string; dados: import('./leitura/tipos').LidoBio } | null>(null);
+export const rotuloLido = criarRascunho<{ importacaoId: string; via: string; dados: import('./leitura/tipos').LidoRotulo } | null>(null);

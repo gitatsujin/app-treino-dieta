@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronDown, ChevronUp, Footprints, Plus, Trash2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, FileCheck, Footprints, Plus, Trash2 } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 
-import { AppText, BottomActionBar, BottomSheet, Button, Card, ChipGroup, Divider, FieldLabel, FieldRow, IconTile, Screen, TextField, TopBar } from '@/components/ui';
-import { AEROBICOS, letra, planoAtivo, reps, salvarPlano } from '@/db/treino';
+import { AppText, Banner, BottomActionBar, BottomSheet, Button, Card, ChipGroup, Divider, FieldLabel, FieldRow, IconTile, Screen, Tag, TextField, TopBar } from '@/components/ui';
+import { AEROBICOS, criarExercicio, letra, planoAtivo, reps, salvarPlano } from '@/db/treino';
+import { concluirImportacao } from '@/lib/leitura';
 import type { TipoAerobico } from '@/lib/calculos';
 import { campo, lerNumero } from '@/lib/formato';
 import { chave, lerReps, rascunhoPlano, type ItemRascunho, type PlanoRascunho } from '@/lib/rascunhos';
@@ -41,11 +42,27 @@ const TIPOS = Object.entries(AEROBICOS) as [TipoAerobico, string][];
 export default function EditarPlano() {
   const { colors } = useTheme();
   const { treino } = useLocalSearchParams<{ treino?: string }>();
-  useState(() => rascunhoPlano.definir(montar(treino)));
+  // Vindo de uma importação, o rascunho já está pronto (lido da foto ou PDF); senão, parte do plano atual.
+  const [importacao] = useState(() => {
+    const atual = rascunhoPlano.ler();
+    if (atual?.importacao) return atual.importacao;
+    rascunhoPlano.definir(montar(treino));
+    return null;
+  });
+  const [salvo, setSalvo] = useState(false);
   const r = rascunhoPlano.useValor();
   const [aer, setAer] = useState<{ tipo: TipoAerobico; duracao: string } | null>(null);
   const [tentou, setTentou] = useState(false);
-  useEffect(() => () => rascunhoPlano.definir(null), []);
+  useEffect(
+    () => () => {
+      rascunhoPlano.definir(null);
+    },
+    [],
+  );
+  // Saiu sem salvar uma importação: ela fica registrada como descartada (RN01).
+  useEffect(() => () => void (importacao && !salvoRef.current && concluirImportacao(importacao.id, false)), [importacao]);
+  const salvoRef = useRef(false);
+  salvoRef.current = salvo;
   if (!r) return null;
 
   const t = r.treinos[r.atual] ?? r.treinos[0];
@@ -69,6 +86,14 @@ export default function EditarPlano() {
   const salvar = () => {
     setTentou(true);
     if (erros || vazios) return;
+    // Exercícios lidos que não existem no catálogo viram exercícios do usuário.
+    const novos = new Map<string, string>();
+    const idDe = (i: ItemRascunho) => {
+      if (i.exercicio_id || i.tipo_aerobico) return i.exercicio_id;
+      const k = i.nome.trim().toLowerCase();
+      if (!novos.has(k)) novos.set(k, criarExercicio({ nome: i.nome.trim(), grupo_muscular: 'corpo_todo', equipamento: 'outro' }));
+      return novos.get(k)!;
+    };
     salvarPlano({
       nome: r.nome.trim(),
       treinos: r.treinos.map((x) => ({
@@ -77,7 +102,7 @@ export default function EditarPlano() {
         itens: x.itens.map((i) => {
           const [mi, ma] = lerReps(i.reps);
           return {
-            exercicio_id: i.exercicio_id,
+            exercicio_id: idDe(i),
             tipo_aerobico: i.tipo_aerobico,
             series_previstas: i.tipo_aerobico ? null : Number(i.series),
             reps_min: i.tipo_aerobico ? null : mi,
@@ -87,8 +112,12 @@ export default function EditarPlano() {
           };
         }),
       })),
-    });
-    router.back();
+    }, importacao ? { importacao_id: importacao.id } : {});
+    if (importacao) concluirImportacao(importacao.id, true);
+    setSalvo(true);
+    salvoRef.current = true;
+    if (importacao) router.dismissTo('/treino');
+    else router.back();
   };
 
   const letras = r.treinos.map((_, i) => letra(i));
@@ -96,6 +125,14 @@ export default function EditarPlano() {
   return (
     <>
       <Screen header={<TopBar title={planoAtivo() ? 'Editar plano' : 'Novo plano'} />} footer={<BottomActionBar primary={{ label: 'Salvar plano', onPress: salvar }} />}>
+        {importacao ? (
+          <Banner
+            icon={FileCheck}
+            tone="neutral"
+            title={importacao.via === 'ia' ? 'Ficha lida com IA' : 'Ficha lida no aparelho'}
+            message={`Confira tudo antes de salvar: itens marcados com "Revisar" merecem atenção, e exercícios marcados como "Novo" serão criados.${planoAtivo() ? ' Salvar substitui o seu plano atual.' : ''}`}
+          />
+        ) : null}
         <TextField label="Nome do plano" value={r.nome} onChangeText={(v) => mudar((p) => ({ ...p, nome: v }))} placeholder="Ex.: Plano ABC · Hipertrofia" warning={tentou && !r.nome.trim()} />
         <ChipGroup
           options={[...letras, '+ Treino']}
@@ -118,6 +155,8 @@ export default function EditarPlano() {
                   <AppText variant="itemTitle" style={{ flex: 1 }}>
                     {i.tipo_aerobico ? AEROBICOS[i.tipo_aerobico] : i.nome}
                   </AppText>
+                  {!i.exercicio_id && !i.tipo_aerobico ? <Tag label="Novo" tone="training" /> : null}
+                  {i.revisar ? <Tag label="Revisar" tone="diet" /> : null}
                   <Pressable accessibilityLabel="Subir" hitSlop={6} onPress={() => mover(i.chave, -1)} disabled={n === 0}>
                     <ChevronUp size={20} color={n === 0 ? colors.track : colors.textMuted} />
                   </Pressable>

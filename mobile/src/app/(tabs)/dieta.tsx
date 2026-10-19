@@ -22,7 +22,7 @@ import {
   TextField,
 } from '@/components/ui';
 import { hojeIso, useConsulta } from '@/db/conexao';
-import { avulsosDoDia, dietaAtiva, marcarRefeicao, nutrientes, refeicoesDoDia, resumoDoDia, type Consumo } from '@/db/dieta';
+import { avulsosDoDia, dietaAtiva, marcarRefeicao, nutrientes, refeicoesDoDia, resumoDoDia, type Consumo, type ResumoDia } from '@/db/dieta';
 import { definirMetaCalorias, usuario } from '@/db/perfil';
 import { campo, diaSemanaCurta, kcal, lerNumero, num, somarDias } from '@/lib/formato';
 import { font, space } from '@/theme/tokens';
@@ -53,7 +53,7 @@ export default function DietaScreen() {
     </View>
   );
 
-  if (!d.dieta) return <SemPlano seletor={seletor} data={data} kcalDia={d.r.kcal} avulsos={d.avulsos} />;
+  if (!d.dieta) return <SemPlano seletor={seletor} data={data} r={d.r} avulsos={d.avulsos} />;
 
   const { r } = d;
   const abrir = (id: string) => router.push({ pathname: '/dieta/refeicao', params: { id, data } });
@@ -88,20 +88,7 @@ export default function DietaScreen() {
           ) : null}
         </View>
         <ProgressBar value={r.kcal} max={r.meta || 1} color={colors.diet} />
-        <View style={styles.between}>
-          {[
-            ['Consumido', kcal(r.kcal)],
-            ['Gasto', kcal(r.gasto)],
-            ['Balanço', `${r.balanco > 0 ? '+' : r.balanco < 0 ? '−' : ''}${kcal(Math.abs(r.balanco))}`],
-          ].map(([l, v]) => (
-            <View key={l} style={{ gap: 2 }}>
-              <AppText variant="caption" color="textMuted">
-                {l}
-              </AppText>
-              <AppText variant="itemTitle">{v}</AppText>
-            </View>
-          ))}
-        </View>
+        <BalancoDoDia r={r} />
         <Divider />
         <View style={{ flexDirection: 'row', gap: space.lg }}>
           {macros.map(([nome, id]) => {
@@ -192,7 +179,8 @@ export default function DietaScreen() {
 }
 
 /** Aba Dieta sem plano alimentar (RF20, RF36). */
-function SemPlano({ seletor, data, kcalDia, avulsos }: { seletor: React.ReactNode; data: string; kcalDia: number; avulsos: Consumo[] }) {
+function SemPlano({ seletor, data, r, avulsos }: { seletor: React.ReactNode; data: string; r: ResumoDia; avulsos: Consumo[] }) {
+  const kcalDia = r.kcal;
   const meta = useConsulta(() => usuario()?.meta_calorias_kcal ?? null);
   const [modo, setModo] = useState(meta ? 'Definir valor' : 'Sem meta');
   const [valor, setValor] = useState(campo(meta) || '');
@@ -210,6 +198,7 @@ function SemPlano({ seletor, data, kcalDia, avulsos }: { seletor: React.ReactNod
           <AppText color="textMuted">{meta ? `/ ${num(meta, 0)} kcal` : 'kcal consumidas'}</AppText>
         </View>
         {meta ? <ProgressBar value={kcalDia} max={meta} /> : null}
+        <BalancoDoDia r={r} />
       </Card>
       <Card>
         <AppText variant="itemTitle">Meta diária de calorias</AppText>
@@ -250,3 +239,23 @@ const styles = StyleSheet.create({
   item: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
   micro: { flexDirection: 'row', alignItems: 'center', gap: space.md },
 });
+
+/** Consumido, gasto (TMB + atividades; com relógio, a energia ativa medida) e balanço do dia (RN06). */
+function BalancoDoDia({ r }: { r: ResumoDia }) {
+  return (
+    <View style={styles.between}>
+      {[
+        ['Consumido', kcal(r.kcal)],
+        [r.atividadesOrigem === 'relogio' ? 'Gasto (relógio)' : 'Gasto', kcal(r.gasto)],
+        ['Balanço', `${r.balanco > 0 ? '+' : r.balanco < 0 ? '−' : ''}${kcal(Math.abs(r.balanco))}`],
+      ].map(([l, v]) => (
+        <View key={l} style={{ gap: 2 }}>
+          <AppText variant="caption" color="textMuted">
+            {l}
+          </AppText>
+          <AppText variant="itemTitle">{v}</AppText>
+        </View>
+      ))}
+    </View>
+  );
+}

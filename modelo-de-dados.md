@@ -373,6 +373,8 @@ Toda importação por foto ou PDF fica registrada até o usuário revisar o resu
 | status | TEXT | `processando`, `aguardando_revisao`, `confirmada`, `descartada`, `erro` | RF07, RN01 |
 | resultado_json | TEXT (JSON) | dados reconhecidos, antes da revisão | RF07 |
 
+O `resultado_json` guarda também por onde a leitura foi feita (`via`: `ia` ou `aparelho`; com IA, o provedor e o modelo). A escolha da IA e do modo fica em `preferencia` (`leitura_provedor`, `leitura_modo`, `leitura_url`, `leitura_chave`). Itens que não casam com o catálogo viram exercícios do usuário ao salvar o plano; alimentos não encontrados ficam listados na revisão para o usuário adicionar.
+
 ### integracao
 
 | Campo | Tipo | Regras | Req. |

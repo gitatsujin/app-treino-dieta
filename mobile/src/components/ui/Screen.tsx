@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { space } from '@/theme/tokens';
+
+import { ALTURA_BARRA_TECLADO } from './Teclado';
+
+/** Folga entre o campo focado e a barra do teclado: mostra o campo e um pouco do que vem abaixo dele. */
+const ESPACO_ACIMA_DO_TECLADO = 72;
 import { useTheme } from '@/theme/use-theme';
 
 type Props = {
@@ -24,9 +30,16 @@ export function Screen({ header, footer, children, scroll = true }: Props) {
     <SafeAreaView edges={['top']} style={[styles.root, { backgroundColor: colors.background }]}>
       {header}
       {scroll ? (
-        <ScrollView style={styles.body} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        // Ao focar um campo, rola só o necessário para ele ficar logo acima do teclado (e da barra "Concluído").
+        <KeyboardAwareScrollView
+          style={styles.body}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          bottomOffset={ALTURA_BARRA_TECLADO + ESPACO_ACIMA_DO_TECLADO}>
           {children}
-        </ScrollView>
+        </KeyboardAwareScrollView>
       ) : (
         <View style={[styles.body, styles.content]}>{children}</View>
       )}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { Halter } from '@/components/icons/Halter';
+import { Duplicidades } from '@/components/Duplicidades';
 import { Recentes } from '@/components/Historico';
 import {
   AppText,
@@ -80,6 +81,7 @@ export default function TreinoScreen() {
           action={{ icon: Plus, label: 'Registrar aeróbico', onPress: () => router.push('/treino/aerobico') }}
         />
       }>
+      <Duplicidades />
       {d.fase?.fase === 'Menstrual' ? (
         <Banner
           icon={Droplet}
@@ -178,6 +180,7 @@ export default function TreinoScreen() {
 function SemPlano({ recentes }: { recentes: ItemHistorico[] }) {
   return (
     <Screen header={<ScreenHeader title="Treino" subtitle="Nenhum plano ativo" />}>
+      <Duplicidades />
       <Card style={{ alignItems: 'center' }}>
         <IconTile icon={Halter} size={52} />
         <AppText style={{ fontFamily: 'Inter_600SemiBold', fontSize: 18 }}>Você ainda não tem um plano</AppText>

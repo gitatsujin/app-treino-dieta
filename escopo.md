@@ -154,6 +154,7 @@ As notificações ficam fora do MVP e entram numa versão posterior.
 - **RNF06** — A base de alimentos deve funcionar offline, embarcada no app. No MVP, a fonte principal é a TACO (Tabela Brasileira de Composição de Alimentos, 4ª ed., NEPA/UNICAMP), cuja reprodução é permitida com citação da fonte. A TBCA (FoRC/USP) entra quando houver autorização dos coordenadores para uso comercial. Produtos de marca são cobertos por código de barras e leitura da tabela nutricional (RF38–RF40).
 - **RNF07** — A arquitetura de dados deve permitir migrar os dados locais para uma conta na nuvem no lançamento, sem perda de histórico.
 - **RNF08 a RNF11** — Ver [Identidade visual](#identidade-visual).
+- **RNF12** — Leitura de fotos e PDFs (RF05–RF07, RF15–RF17, RF39, RF50) em dois modos: com internet, o arquivo vai para um servidor de leitura próprio (Cloudflare Worker) que consulta a IA escolhida pelo usuário (Claude, Gemini ou GPT) e devolve os dados estruturados; sem internet, o celular reconhece o texto da foto (Apple Vision / ML Kit) e regras montam o rascunho. PDF exige internet. As chaves das IAs ficam só no servidor, nunca no app, e o servidor não guarda o arquivo. O usuário pode escolher o modo Automático, Só com IA ou Só no aparelho.
 
 ## Regras de negócio
 

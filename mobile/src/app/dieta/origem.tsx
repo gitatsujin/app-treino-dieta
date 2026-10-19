@@ -1,35 +1,50 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, FileText, Image as ImageIcon, Sparkles } from 'lucide-react-native';
+import { Camera, ChevronRight, FileText, Image as ImageIcon, Sparkles } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText, Banner, Button, IconTile } from '@/components/ui';
+import { AppText, Button, IconTile } from '@/components/ui';
+import { escolherArquivo, type Alvo, type Origem } from '@/lib/leitura';
+import { arquivoEscolhido } from '@/lib/rascunhos';
 import { font, radius, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-const OPCOES: [LucideIcon, string, string][] = [
-  [Camera, 'Tirar foto', 'Dieta impressa ou escrita à mão'],
-  [ImageIcon, 'Escolher da galeria', 'Foto ou print já salvo'],
-  [FileText, 'Escolher PDF', 'Arquivo enviado pelo nutricionista'],
-];
+const ALVOS: Record<Alvo, { titulo: string; texto: string; manual: string; foto: string; pdf: string | null }> = {
+  dieta: { titulo: 'Importar dieta', texto: 'Envie a dieta do nutricionista. Você revisa tudo antes de salvar.', manual: '/dieta/editar', foto: 'Dieta impressa ou escrita à mão', pdf: 'Arquivo enviado pelo nutricionista' },
+  treino: { titulo: 'Importar ficha', texto: 'Envie a ficha da academia. Você revisa tudo antes de salvar.', manual: '/treino/plano', foto: 'Ficha impressa ou escrita à mão', pdf: 'Ficha recebida em PDF' },
+  bio: { titulo: 'Importar laudo', texto: 'Envie o laudo da bioimpedância. Você revisa tudo antes de salvar.', manual: '/perfil/bioimpedancia', foto: 'Laudo impresso', pdf: 'Laudo em PDF' },
+  rotulo: { titulo: 'Tabela nutricional', texto: 'Fotografe a tabela da embalagem. Você confere os valores antes de salvar.', manual: '/dieta/novo-alimento', foto: 'Tabela inteira, com boa luz', pdf: null },
+};
 
-const ALVOS = {
-  dieta: { titulo: 'Importar dieta', texto: 'Envie a dieta do nutricionista. Você revisa tudo antes de salvar.', manual: '/dieta/editar' },
-  treino: { titulo: 'Importar ficha', texto: 'Envie a ficha da academia. Você revisa tudo antes de salvar.', manual: '/treino/plano' },
-  bio: { titulo: 'Importar laudo', texto: 'Envie o laudo da bioimpedância. Você revisa tudo antes de salvar.', manual: '/perfil/bioimpedancia' },
-} as const;
-
-/**
- * Origem da importação (painel por cima da tela atual). Vale para dieta, ficha de treino e laudo.
- * A leitura automática por foto ou PDF depende de um serviço de reconhecimento (etapa 3 do MVP);
- * até lá, o painel mostra as opções e leva ao cadastro manual.
- */
+/** Origem da importação (painel por cima da tela atual). Vale para dieta, ficha de treino, laudo e rótulo. */
 export default function OrigemImportacao() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
-  const { alvo = 'dieta' } = useLocalSearchParams<{ alvo?: keyof typeof ALVOS }>();
+  const { alvo = 'dieta', codigo } = useLocalSearchParams<{ alvo?: Alvo; codigo?: string }>();
+  const params = codigo ? { codigo } : undefined;
   const a = ALVOS[alvo] ?? ALVOS.dieta;
+  const [erro, setErro] = useState('');
+
+  const opcoes: [Origem, LucideIcon, string, string][] = [
+    ['camera', Camera, 'Tirar foto', a.foto],
+    ['galeria', ImageIcon, 'Escolher da galeria', 'Foto ou print já salvo'],
+    ...(a.pdf ? ([['pdf', FileText, 'Escolher PDF', a.pdf]] as [Origem, LucideIcon, string, string][]) : []),
+  ];
+
+  const escolher = async (origem: Origem) => {
+    setErro('');
+    try {
+      const arquivo = await escolherArquivo(origem);
+      if (!arquivo) return;
+      arquivoEscolhido.definir({ alvo, arquivo, params });
+      router.replace('/dieta/lendo');
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Não foi possível abrir o arquivo.');
+    }
+  };
+
   return (
     <View style={styles.root}>
       <Pressable style={StyleSheet.absoluteFill} onPress={() => router.back()} accessibilityLabel="Fechar" />
@@ -37,20 +52,30 @@ export default function OrigemImportacao() {
         <View style={[styles.handle, { backgroundColor: colors.track }]} />
         <AppText style={{ fontFamily: font.bold, fontSize: 20 }}>{a.titulo}</AppText>
         <AppText color="textMuted">{a.texto}</AppText>
-        {OPCOES.map(([Icon, t, s]) => (
-          <View key={t} style={[styles.option, { backgroundColor: colors.background, opacity: 0.5 }]}>
-            <IconTile icon={Icon} tone="diet" size={40} />
+        {opcoes.map(([origem, Icon, t, s]) => (
+          <Pressable key={origem} onPress={() => escolher(origem)} style={({ pressed }) => [styles.option, { backgroundColor: colors.background, opacity: pressed ? 0.7 : 1 }]}>
+            <IconTile icon={Icon} tone={alvo === "treino" ? "training" : "diet"} size={40} />
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="itemTitle">{t}</AppText>
               <AppText variant="caption" color="textMuted">
                 {s}
               </AppText>
             </View>
-          </View>
+            <ChevronRight size={16} color={colors.textMuted} />
+          </Pressable>
         ))}
-        <Banner icon={Sparkles} tone="neutral" message="A leitura automática por foto e PDF chega em breve. Por enquanto, cadastre manualmente: leva poucos minutos." />
-        <Button label="Cadastrar manualmente" onPress={() => router.replace(a.manual)} />
-        <Button variant="secondary" label="Cancelar" onPress={() => router.back()} />
+        {erro ? (
+          <AppText variant="bodySmall" color="dietStrong">
+            {erro}
+          </AppText>
+        ) : null}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+          <Sparkles size={16} color={colors.textMuted} />
+          <AppText variant="caption" color="textMuted" style={{ flex: 1 }}>
+            Com internet, a leitura é feita por IA. Sem internet, o celular lê fotos de texto impresso.
+          </AppText>
+        </View>
+        <Button variant="secondary" label="Cadastrar manualmente" onPress={() => router.replace({ pathname: a.manual, params } as never)} />
       </View>
     </View>
   );

@@ -10,4 +10,5 @@ export { BottomSheet, ConfirmDialog } from './Overlay';
 export { ProgressBar } from './ProgressBar';
 export { Screen } from './Screen';
 export { ScreenHeader } from './ScreenHeader';
+export { ALTURA_BARRA_TECLADO, BarraTeclado } from './Teclado';
 export { TopBar } from './TopBar';

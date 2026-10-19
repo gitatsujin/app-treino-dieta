@@ -1,9 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { Calendar, Camera, Trash2 } from 'lucide-react-native';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 
 import { AppText, BottomActionBar, Button, Card, ConfirmDialog, Divider, FieldRow, ListRow, Screen, SectionHeader, Shortcut, Tag, TextField, TopBar } from '@/components/ui';
+import { concluirImportacao } from '@/lib/leitura';
+import { bioLida } from '@/lib/rascunhos';
 import { hojeIso, useConsulta } from '@/db/conexao';
 import { bios, excluirBio, pesoAtual, salvarBio, usuario } from '@/db/perfil';
 import { classeImc, imc } from '@/lib/calculos';
@@ -18,15 +20,30 @@ export default function RegistrarBioimpedancia() {
   const lista = useConsulta(() => bios());
   const ex = id ? lista.find((b) => b.id === id) : undefined;
   const u = usuario();
-  const [data, setData] = useState(campoData(ex?.data ?? hojeIso()));
+  // Laudo lido por foto/PDF: preenche o formulário uma vez; o usuário confere antes de salvar (RN01).
+  const [lida] = useState(() => {
+    const l = id ? null : bioLida.ler();
+    bioLida.definir(null);
+    return l;
+  });
+  const salvoRef = useRef(false);
+  useEffect(
+    () => () => {
+      if (lida && !salvoRef.current) concluirImportacao(lida.importacaoId, false);
+    },
+    [lida],
+  );
+  const L = lida?.dados;
+  const dataLida = L?.data && L.data <= hojeIso() ? L.data : null;
+  const [data, setData] = useState(campoData(ex?.data ?? dataLida ?? hojeIso()));
   const [f, setF] = useState<Record<string, string>>({
-    peso: campo(ex?.peso_kg ?? pesoAtual()?.peso_kg),
-    cintura: campo(ex?.cintura_cm),
-    gordura: campo(ex?.gordura_pct),
-    musculo: campo(ex?.musculo_esqueletico_pct),
-    visceral: campo(ex?.gordura_visceral_nivel),
-    idadeBio: campo(ex?.idade_biologica),
-    tmb: campo(ex?.metabolismo_repouso_kcal),
+    peso: campo(ex?.peso_kg ?? L?.peso_kg ?? pesoAtual()?.peso_kg),
+    cintura: campo(ex?.cintura_cm ?? L?.cintura_cm),
+    gordura: campo(ex?.gordura_pct ?? L?.gordura_pct),
+    musculo: campo(ex?.musculo_esqueletico_pct ?? L?.musculo_esqueletico_pct),
+    visceral: campo(ex?.gordura_visceral_nivel ?? L?.gordura_visceral_nivel),
+    idadeBio: campo(ex?.idade_biologica ?? L?.idade_biologica),
+    tmb: campo(ex?.metabolismo_repouso_kcal ?? L?.metabolismo_repouso_kcal),
   });
   const [tentou, setTentou] = useState(false);
   const [apagar, setApagar] = useState(false);
@@ -62,9 +79,14 @@ export default function RegistrarBioimpedancia() {
         metabolismo_repouso_kcal: int('tmb'),
         idade_biologica: int('idadeBio'),
         gordura_visceral_nivel: int('visceral'),
+        ...(lida ? { importacao_id: lida.importacaoId } : {}),
       },
       ex?.id,
     );
+    if (lida) {
+      salvoRef.current = true;
+      concluirImportacao(lida.importacaoId, true);
+    }
     router.back();
   };
 
@@ -75,9 +97,16 @@ export default function RegistrarBioimpedancia() {
   return (
     <>
       <Screen header={<TopBar title={ex ? 'Bioimpedância' : 'Nova bioimpedância'} />} footer={<BottomActionBar primary={{ label: 'Salvar exame', onPress: salvar }} />}>
-        {!ex ? (
+        {lida ? (
+          <Card>
+            <AppText variant="itemTitle">Laudo lido {lida.via === 'ia' ? 'com IA' : 'no aparelho'}</AppText>
+            <AppText variant="bodySmall" color="textMuted">
+              Confira cada valor com o laudo antes de salvar. Campos vazios não foram encontrados.
+            </AppText>
+          </Card>
+        ) : !ex ? (
           <>
-            <Shortcut icon={Camera} label="Foto ou PDF do laudo" onPress={() => router.push({ pathname: '/dieta/origem', params: { alvo: 'bio' } })} />
+            <Shortcut icon={Camera} label="Foto ou PDF do laudo" onPress={() => router.replace({ pathname: '/dieta/origem', params: { alvo: 'bio' } })} />
             <AppText variant="caption" color="textMuted" style={{ textAlign: 'center' }}>
               ou preencha os campos do exame
             </AppText>

@@ -16,7 +16,7 @@ export default function Privacidade() {
   return (
     <>
       <Screen header={<TopBar title="Privacidade e dados" />}>
-        <Banner icon={Smartphone} tone="training" message="Seus dados ficam guardados só neste aparelho. Nada é enviado para servidores." />
+        <Banner icon={Smartphone} tone="training" message="Seus dados ficam guardados só neste aparelho. Só as fotos e PDFs que você importar com internet são enviados, para leitura pela IA." />
         <Card gap={0}>
           <AppText variant="itemTitle" style={{ paddingBottom: space.xs }}>
             O que o app pode usar

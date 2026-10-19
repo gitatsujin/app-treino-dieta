@@ -97,7 +97,7 @@ export function bios(): Bio[] {
   return db().all<Bio>('SELECT * FROM bioimpedancia WHERE excluido_em IS NULL ORDER BY data DESC, criado_em DESC');
 }
 
-export function salvarBio(b: Omit<Bio, 'id'>, id?: string) {
+export function salvarBio(b: Omit<Bio, 'id'> & { importacao_id?: string }, id?: string) {
   return gravar(() => {
     if (id) {
       atualizar('bioimpedancia', id, b);

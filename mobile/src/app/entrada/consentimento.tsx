@@ -17,7 +17,7 @@ export default function Consentimento() {
   const [ciclo, setCiclo] = useState(pref('consentimento_ciclo') === '1');
   const itens: [string, string, boolean, boolean][] = [
     ['Dados de saúde', 'Peso, bioimpedância, treinos e alimentação. Necessários para o app funcionar.', true, true],
-    ['Fotos e PDFs importados', 'Usados só para ler fichas de treino, dietas e laudos.', true, true],
+    ['Fotos e PDFs importados', 'Usados só para ler fichas, dietas, laudos e rótulos. Com internet, o arquivo é enviado à IA escolhida só para a leitura; sem internet, o próprio celular lê.', true, true],
   ];
   if (feminino) itens.push(['Ciclo menstrual', 'Para relacionar fases do ciclo com o desempenho nos treinos.', ciclo, false]);
   const aceitar = () => {

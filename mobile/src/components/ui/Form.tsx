@@ -22,6 +22,7 @@ export function TextField({
   keyboardType,
   multiline,
   autoCapitalize,
+  secureTextEntry,
   maxLength,
   onBlur,
 }: {
@@ -37,6 +38,7 @@ export function TextField({
   keyboardType?: KeyboardTypeOptions;
   multiline?: boolean;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  secureTextEntry?: boolean;
   maxLength?: number;
   onBlur?: () => void;
 }) {
@@ -64,6 +66,7 @@ export function TextField({
           keyboardType={keyboardType}
           multiline={multiline}
           autoCapitalize={autoCapitalize}
+          secureTextEntry={secureTextEntry}
           maxLength={maxLength}
           onBlur={onBlur}
           style={[styles.text, { color: colors.text }]}

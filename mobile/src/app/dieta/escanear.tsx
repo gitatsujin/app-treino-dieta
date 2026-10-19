@@ -1,13 +1,14 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Camera, Pencil, Sparkles, Zap, ZapOff } from 'lucide-react-native';
+import { Camera, Image as ImageIcon, Pencil, Sparkles, Zap, ZapOff } from 'lucide-react-native';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText, Banner, BottomActionBar, Button, Card, IconTile, Screen, SegmentedControl, TopBar } from '@/components/ui';
 import { alimentoPorCodigo, criarAlimento } from '@/db/dieta';
+import { escolherArquivo, type Origem } from '@/lib/leitura';
 import { buscarProduto } from '@/lib/openfoodfacts';
-import { alimentoCriado } from '@/lib/rascunhos';
+import { alimentoCriado, arquivoEscolhido } from '@/lib/rascunhos';
 import { font, space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
@@ -24,6 +25,20 @@ export default function Escanear() {
   const [luz, setLuz] = useState(false);
   const [estado, setEstado] = useState<{ tipo: 'lendo' | 'buscando' | 'erro'; msg?: string; codigo?: string }>({ tipo: 'lendo' });
   const ocupado = useRef(false);
+  const [erroFoto, setErroFoto] = useState('');
+
+  /** Tabela nutricional: foto ou galeria → leitura (IA ou aparelho) → cadastro preenchido para conferir. */
+  const fotografar = async (origem: Origem) => {
+    setErroFoto('');
+    try {
+      const arquivo = await escolherArquivo(origem);
+      if (!arquivo) return;
+      arquivoEscolhido.definir({ alvo: 'rotulo', arquivo });
+      router.replace('/dieta/lendo');
+    } catch (e) {
+      setErroFoto(e instanceof Error ? e.message : 'Não foi possível abrir a câmera.');
+    }
+  };
 
   /** Depois de achar o produto, abre "Adicionar alimento" com ele selecionado. */
   const usar = (id: string) => {
@@ -87,14 +102,20 @@ export default function Escanear() {
   return (
     <Screen
       header={<TopBar title="Escanear" leading="close" onLeadingPress={() => router.dismissTo('/')} />}
-      footer={tabela ? <BottomActionBar primary={{ label: 'Adicionar manualmente', onPress: () => router.replace('/dieta/novo-alimento') }} /> : undefined}>
+      footer={tabela ? <BottomActionBar primary={{ label: 'Fotografar tabela', onPress: () => fotografar('camera') }} /> : undefined}>
       <SegmentedControl options={['Código de barras', 'Tabela nutricional']} selected={modo} onChange={setModo} />
       {tabela ? (
         <>
           <View style={[styles.camera, { height: 220 }]}>
             <IconTile icon={Sparkles} tone="neutral" size={52} />
           </View>
-          <Banner icon={Sparkles} tone="neutral" message="A leitura automática da tabela nutricional por foto chega em breve. Por enquanto, digite os valores da embalagem: o alimento fica salvo para as próximas vezes." />
+          <Banner icon={Sparkles} tone="neutral" message="Fotografe a tabela inteira, de frente e com boa luz. Os valores preenchem o cadastro e você confere antes de salvar." />
+          <Button variant="secondary" icon={ImageIcon} label="Escolher da galeria" onPress={() => fotografar('galeria')} />
+          {erroFoto ? (
+            <AppText variant="bodySmall" color="dietStrong">
+              {erroFoto}
+            </AppText>
+          ) : null}
         </>
       ) : (
         <>

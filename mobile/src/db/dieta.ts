@@ -4,7 +4,7 @@ import { somarDias } from '@/lib/formato';
 
 import { agoraIso, atualizar, db, excluir, gravar, hojeIso, inserir, USUARIO_ID } from './conexao';
 import { tmb, usuario } from './perfil';
-import { gastoAtividadesDoDia } from './treino';
+import { gastoAtividadesComOrigem } from './treino';
 
 /* ---------- Nutrientes e alimentos ---------- */
 
@@ -312,6 +312,8 @@ export type ResumoDia = {
   metaOrigem: 'dieta' | 'usuario' | null;
   tmb: number;
   atividades: number;
+  /** 'relogio' quando a energia ativa veio do Apple Saúde / Health Connect (RN11). */
+  atividadesOrigem: 'relogio' | 'estimativa';
   gasto: number;
   balanco: number;
   metasMacros: Valores | null;
@@ -324,7 +326,7 @@ export function resumoDoDia(data = hojeIso()): ResumoDia {
   const kcal = Math.round(consumido.energia ?? 0);
   const meta = metaCaloricaDoDia(dieta);
   const base = tmb(data)?.kcal ?? 0;
-  const atividades = gastoAtividadesDoDia(data);
+  const { kcal: atividades, origem: atividadesOrigem } = gastoAtividadesComOrigem(data);
   const gasto = base + atividades;
   return {
     data,
@@ -334,6 +336,7 @@ export function resumoDoDia(data = hojeIso()): ResumoDia {
     metaOrigem: meta.origem,
     tmb: base,
     atividades,
+    atividadesOrigem,
     gasto,
     balanco: kcal - gasto,
     metasMacros: dieta ? dieta.valores : null,

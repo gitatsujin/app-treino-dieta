@@ -1,10 +1,13 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { AppText, BottomActionBar, FieldRow, Screen, TextField, TopBar } from '@/components/ui';
+import { AppText, BottomActionBar, Card, FieldRow, Screen, Shortcut, TextField, TopBar } from '@/components/ui';
 import { criarAlimento, type Valores } from '@/db/dieta';
-import { lerNumero } from '@/lib/formato';
-import { alimentoCriado } from '@/lib/rascunhos';
+import { Camera } from 'lucide-react-native';
+
+import { campo, lerNumero } from '@/lib/formato';
+import { concluirImportacao } from '@/lib/leitura';
+import { alimentoCriado, rotuloLido } from '@/lib/rascunhos';
 
 const CAMPOS: [id: string, rotulo: string, unidade: string][] = [
   ['energia', 'Calorias', 'kcal'],
@@ -21,11 +24,30 @@ const CAMPOS: [id: string, rotulo: string, unidade: string][] = [
  */
 export default function NovoAlimento() {
   const p = useLocalSearchParams<{ codigo?: string; nome?: string; marca?: string }>();
-  const [nome, setNome] = useState(p.nome ?? '');
-  const [marca, setMarca] = useState(p.marca ?? '');
-  const [porcao, setPorcao] = useState('100');
-  const [medida, setMedida] = useState('');
-  const [v, setV] = useState<Record<string, string>>({});
+  // Tabela nutricional lida por foto: preenche o cadastro; o usuário confere antes de salvar (RN01).
+  const [lido] = useState(() => {
+    const l = rotuloLido.ler();
+    rotuloLido.definir(null);
+    return l;
+  });
+  const salvoRef = useRef(false);
+  useEffect(
+    () => () => {
+      if (lido && !salvoRef.current) concluirImportacao(lido.importacaoId, false);
+    },
+    [lido],
+  );
+  const R = lido?.dados;
+  const [nome, setNome] = useState(p.nome || R?.nome || '');
+  const [marca, setMarca] = useState(p.marca || R?.marca || '');
+  const [porcao, setPorcao] = useState(R?.porcao_g ? campo(R.porcao_g) : '100');
+  const [medida, setMedida] = useState(R?.medida_caseira ?? '');
+  const [v, setV] = useState<Record<string, string>>(() => {
+    const pp = R?.por_porcao;
+    if (!pp) return {};
+    const m: Record<string, number | null> = { energia: pp.energia_kcal, proteina: pp.proteina_g, carboidrato: pp.carboidrato_g, gordura: pp.gordura_g, fibra: pp.fibra_g, sodio: pp.sodio_mg };
+    return Object.fromEntries(Object.entries(m).filter(([, x]) => x != null).map(([k, x]) => [k, campo(x)]));
+  });
   const [tentou, setTentou] = useState(false);
 
   const g = lerNumero(porcao);
@@ -43,18 +65,32 @@ export default function NovoAlimento() {
     const id = criarAlimento({
       nome: nome.trim(),
       marca: marca.trim() || null,
-      fonte: p.codigo ? 'rotulo' : 'manual',
+      fonte: p.codigo || lido ? 'rotulo' : 'manual',
       codigo_barras: p.codigo ?? null,
       porcao_padrao_g: g,
       medida_caseira: medida.trim() || null,
       valores,
     });
+    if (lido) {
+      salvoRef.current = true;
+      concluirImportacao(lido.importacaoId, true);
+    }
     alimentoCriado.definir(id);
     router.back();
   };
 
   return (
     <Screen header={<TopBar title="Novo alimento" subtitle={p.codigo ? `Código ${p.codigo}` : undefined} />} footer={<BottomActionBar primary={{ label: 'Salvar alimento', onPress: salvar }} />}>
+      {lido ? (
+        <Card>
+          <AppText variant="itemTitle">Tabela lida {lido.via === 'ia' ? 'com IA' : 'no aparelho'}</AppText>
+          <AppText variant="bodySmall" color="textMuted">
+            Confira nome, porção e valores com a embalagem antes de salvar.
+          </AppText>
+        </Card>
+      ) : (
+        <Shortcut icon={Camera} label="Fotografar a tabela nutricional" onPress={() => router.replace({ pathname: '/dieta/origem', params: { alvo: 'rotulo', ...(p.codigo ? { codigo: p.codigo } : {}) } })} />
+      )}
       <TextField label="Nome" value={nome} onChangeText={setNome} placeholder="Ex.: Pão de queijo caseiro" autoCapitalize="sentences" warning={tentou && erros.nome} />
       <TextField label="Marca (opcional)" value={marca} onChangeText={setMarca} placeholder="Ex.: nome do fabricante" />
       <FieldRow>

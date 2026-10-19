@@ -1,6 +1,6 @@
 import { router, type Href } from 'expo-router';
 import type { LucideIcon } from 'lucide-react-native';
-import { Database, Download, Droplet, Flame, Heart, Info, Lock, Moon, Ruler, Target, Weight } from 'lucide-react-native';
+import { Database, Download, Droplet, Flame, Heart, Info, Lock, Moon, Ruler, ScanText, Target, Weight } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Avatar, Button, Card, Divider, IconTile, ListRow, Row, Screen, ScreenHeader, SectionHeader, StatCard, Tag } from '@/components/ui';
@@ -8,6 +8,8 @@ import { hojeIso, useConsulta } from '@/db/conexao';
 import { dietaAtiva } from '@/db/dieta';
 import { bios, medidasDaBio, pesoAtual, pesos, pref, tmb, usuario } from '@/db/perfil';
 import { idade } from '@/lib/calculos';
+import { configLeitura, PROVEDORES } from '@/lib/leitura';
+import { integracaoAtiva, NOME_SAUDE } from '@/lib/saude';
 import { dataCompleta, dataCurta, diasEntre, num, somarDias } from '@/lib/formato';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -30,6 +32,8 @@ export default function PerfilScreen() {
       medidas: b && u ? medidasDaBio(b, u, hoje) : [],
       tema: pref('tema'),
       dieta: !!dietaAtiva(),
+      leitura: configLeitura(),
+      saude: !!integracaoAtiva(),
     };
   });
   if (!d.u) return null;
@@ -39,6 +43,7 @@ export default function PerfilScreen() {
     { icon: Ruler, label: 'Unidades', value: 'kg, cm', href: '/perfil/unidades' },
     { icon: Target, label: 'Meta de calorias', value: d.dieta ? 'Pela dieta' : u.meta_calorias_kcal ? `${num(u.meta_calorias_kcal, 0)} kcal` : 'Sem meta', href: '/perfil/meta-calorias' },
     ...(u.sexo === 'feminino' ? [{ icon: Droplet, label: 'Ciclo menstrual', value: u.ciclo_ativo ? 'Ativado' : 'Desativado', href: '/perfil/ciclo' as Href }] : []),
+    { icon: ScanText, label: 'Leitura de arquivos', value: PROVEDORES[d.leitura.provedor].split(' (')[0], href: '/perfil/leitura' },
     { icon: Lock, label: 'Privacidade e dados', href: '/perfil/privacidade' },
     { icon: Download, label: 'Exportar meus dados', href: '/perfil/exportar' },
     { icon: Info, label: 'Sobre o app', href: '/perfil/sobre' },
@@ -122,11 +127,12 @@ export default function PerfilScreen() {
         <View style={styles.item}>
           <IconTile icon={Heart} tone="diet" size={36} />
           <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="itemTitle">Apple Saúde / Health Connect</AppText>
+            <AppText variant="itemTitle">{NOME_SAUDE}</AppText>
             <AppText variant="caption" color="textMuted">
-              Disponível na versão instalável do app
+              {d.saude ? 'Conectado · gasto do dia pelo relógio' : 'Conecte para ler treinos e gasto do relógio'}
             </AppText>
           </View>
+          <Tag label={d.saude ? 'Conectado' : 'Desligado'} tone={d.saude ? 'near' : 'neutral'} />
         </View>
       </Card>
 

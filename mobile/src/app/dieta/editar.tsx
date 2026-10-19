@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { ChevronDown, ChevronUp, Clock, Plus, Trash2 } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
+import { ChevronDown, ChevronUp, Clock, FileCheck, Plus, SearchX, Trash2 } from 'lucide-react-native';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
-import { AppText, BottomActionBar, Button, Card, ConfirmDialog, Divider, FieldRow, Screen, TextField, TopBar } from '@/components/ui';
+import { AppText, Banner, BottomActionBar, Button, Card, ConfirmDialog, Divider, FieldRow, Screen, Tag, TextField, TopBar } from '@/components/ui';
+import { concluirImportacao } from '@/lib/leitura';
 import { dietaAtiva, excluirDieta, salvarDieta, valoresDoAlimento } from '@/db/dieta';
 import { campo, horaValida, kcal, lerNumero, mascaraHora, num } from '@/lib/formato';
 import { chave, rascunhoDieta, type DietaRascunho, type RefeicaoRascunho } from '@/lib/rascunhos';
@@ -36,12 +37,25 @@ function montar(): DietaRascunho {
 /** Cadastro e edição manual da dieta (RF14): refeições, horários, alimentos e quantidades. */
 export default function EditarDieta() {
   const { colors } = useTheme();
-  useState(() => rascunhoDieta.definir(montar()));
+  // Vindo de uma importação, o rascunho já está pronto; senão, parte da dieta atual.
+  const [importacao] = useState(() => {
+    const atual = rascunhoDieta.ler();
+    if (atual?.importacao) return atual.importacao;
+    rascunhoDieta.definir(montar());
+    return null;
+  });
+  const salvoRef = useRef(false);
   const r = rascunhoDieta.useValor();
   const [tentou, setTentou] = useState(false);
   const [apagar, setApagar] = useState(false);
   const existe = !!dietaAtiva();
-  useEffect(() => () => rascunhoDieta.definir(null), []);
+  useEffect(
+    () => () => {
+      rascunhoDieta.definir(null);
+      if (importacao && !salvoRef.current) concluirImportacao(importacao.id, false);
+    },
+    [importacao],
+  );
   if (!r) return null;
 
   const mudar = (fn: (d: DietaRascunho) => DietaRascunho) => rascunhoDieta.definir((d) => (d ? fn(d) : d));
@@ -74,13 +88,41 @@ export default function EditarDieta() {
       refeicoes: r.refeicoes
         .filter((x) => x.itens.length)
         .map((x) => ({ id: x.id, nome: x.nome.trim(), horario: x.horario || null, itens: x.itens.map((i) => ({ alimento_id: i.alimento_id, quantidade_g: lerNumero(i.gramas)! })) })),
-    });
-    router.back();
+    }, importacao ? { importacao_id: importacao.id } : {});
+    salvoRef.current = true;
+    if (importacao) {
+      concluirImportacao(importacao.id, true);
+      router.dismissTo('/dieta');
+    } else router.back();
   };
 
   return (
     <>
       <Screen header={<TopBar title={existe ? 'Editar dieta' : 'Nova dieta'} />} footer={<BottomActionBar primary={{ label: 'Salvar dieta', onPress: salvar }} />}>
+        {importacao ? (
+          <Banner
+            icon={FileCheck}
+            tone="neutral"
+            title={importacao.via === 'ia' ? 'Dieta lida com IA' : 'Dieta lida no aparelho'}
+            message={`Confira alimentos e quantidades antes de salvar. Itens com "Revisar" merecem atenção.${existe ? ' Salvar substitui a sua dieta atual.' : ''}`}
+          />
+        ) : null}
+        {r.naoEncontrados?.length ? (
+          <Card gap={space.sm}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+              <SearchX size={18} color={colors.dietStrong} />
+              <AppText variant="itemTitle">Não encontrados na base ({r.naoEncontrados.length})</AppText>
+            </View>
+            <AppText variant="caption" color="textMuted">
+              Adicione manualmente com "+ Adicionar alimento" na refeição certa:
+            </AppText>
+            {r.naoEncontrados.map((n) => (
+              <AppText key={n} variant="bodySmall">
+                • {n}
+              </AppText>
+            ))}
+          </Card>
+        ) : null}
         <TextField label="Nome da dieta" value={r.nome} onChangeText={(v) => mudar((d) => ({ ...d, nome: v }))} warning={tentou && !r.nome.trim()} />
         <Card gap={space.xs}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -130,9 +172,13 @@ export default function EditarDieta() {
                 <Divider />
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm }}>
                   <View style={{ flex: 1, gap: 2 }}>
-                    <AppText style={{ fontFamily: font.medium }}>{i.nome}</AppText>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <AppText style={{ fontFamily: font.medium, flexShrink: 1 }}>{i.nome}</AppText>
+                      {i.revisar ? <Tag label="Revisar" tone="diet" /> : null}
+                    </View>
                     <AppText variant="caption" color="textMuted">
                       {kcal(((lerNumero(i.gramas) ?? 0) * i.kcal100) / 100)}
+                      {i.lido ? ` · lido: ${i.lido}` : ''}
                     </AppText>
                   </View>
                   <View style={{ width: 96 }}>

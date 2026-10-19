@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { font, radius, space } from '@/theme/tokens';
@@ -8,6 +9,7 @@ import { useTheme } from '@/theme/use-theme';
 
 import { AppText } from './AppText';
 import { Button } from './Button';
+import { ALTURA_BARRA_TECLADO, BarraTeclado } from './Teclado';
 
 /** Painel que sobe de baixo, com fundo escurecido (BottomSheet). */
 export function BottomSheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
@@ -15,11 +17,15 @@ export function BottomSheet({ visible, onClose, children }: { visible: boolean; 
   const insets = useSafeAreaInsets();
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Fechar" />
-      <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, space.xl) + space.md }]}>
-        <View style={[styles.handle, { backgroundColor: colors.track }]} />
-        {children}
-      </View>
+      {/* O painel sobe junto com o teclado; a barra "Concluído" fica entre os dois. */}
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={ALTURA_BARRA_TECLADO}>
+        <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Fechar" />
+        <View style={[styles.sheet, { backgroundColor: colors.surface, paddingBottom: Math.max(insets.bottom, space.xl) + space.md }]}>
+          <View style={[styles.handle, { backgroundColor: colors.track }]} />
+          {children}
+        </View>
+        <BarraTeclado />
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

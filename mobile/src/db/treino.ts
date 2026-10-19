@@ -414,6 +414,13 @@ export function registrarAerobico(a: AerobicoEntrada, id?: string) {
   return gravar(() => {
     const dados = { ...a, calorias_gastas_kcal: estimarAerobico(a).kcal, origem: 'manual' };
     if (id) {
+      // Registro do relógio editado pelo usuário: continua sendo do relógio (mantém as calorias medidas),
+      // mas a próxima sincronização não passa por cima da edição.
+      const ant = db().get<{ origem: string; calorias_gastas_kcal: number | null }>('SELECT origem, calorias_gastas_kcal FROM sessao_aerobico WHERE id = ?', [id]);
+      if (ant && ant.origem !== 'manual') {
+        atualizar('sessao_aerobico', id, { ...a, calorias_gastas_kcal: ant.calorias_gastas_kcal ?? dados.calorias_gastas_kcal, editado_pelo_usuario: 1 });
+        return id;
+      }
       atualizar('sessao_aerobico', id, dados);
       return id;
     }
@@ -487,7 +494,7 @@ export function historico(desde?: string): ItemHistorico[] {
       tipo: 'aerobico',
       inicio: a.inicio,
       titulo: AEROBICOS[a.tipo],
-      detalhe: [`${Math.round(a.duracao_min)} min`, descreverAerobico(a)].filter(Boolean).join(' · '),
+      detalhe: [`${Math.round(a.duracao_min)} min`, descreverAerobico(a), a.origem !== 'manual' ? 'relógio' : ''].filter(Boolean).join(' · '),
       valor: `${a.calorias_gastas_kcal ?? 0} kcal`,
       unidade: 'gasto',
       minutos: a.duracao_min,
@@ -518,8 +525,21 @@ export function semana(data = hojeIso()) {
   return { inicio: ini, fim, treinos, aerobicos, diasComTreino: new Set([...dias, ...diasAer].map((x) => x.d)) };
 }
 
-/** Calorias gastas em atividades num dia (sem a TMB). */
+/**
+ * Calorias gastas em atividades num dia (sem a TMB). Com relógio (Apple Saúde / Health Connect), vale a
+ * energia ativa medida, que já inclui os treinos (RN11); sem ele, a soma das sessões estimadas.
+ */
 export function gastoAtividadesDoDia(data: string): number {
+  return gastoAtividadesComOrigem(data).kcal;
+}
+
+export function gastoAtividadesComOrigem(data: string): { kcal: number; origem: 'relogio' | 'estimativa' } {
+  const relogio = db().get<{ k: number }>('SELECT MAX(energia_ativa_kcal) AS k FROM gasto_ativo_diario WHERE excluido_em IS NULL AND data = ?', [data])?.k;
+  if (relogio != null) return { kcal: relogio, origem: 'relogio' };
+  return { kcal: somaSessoesDoDia(data), origem: 'estimativa' };
+}
+
+function somaSessoesDoDia(data: string): number {
   const s = db().get<{ k: number | null }>("SELECT SUM(calorias_gastas_kcal) AS k FROM sessao_treino WHERE excluido_em IS NULL AND status IN ('concluida','parcial') AND substr(inicio,1,10) = ?", [data])?.k ?? 0;
   const a = db().get<{ k: number | null }>('SELECT SUM(calorias_gastas_kcal) AS k FROM sessao_aerobico WHERE excluido_em IS NULL AND substr(inicio,1,10) = ?', [data])?.k ?? 0;
   return s + a;
