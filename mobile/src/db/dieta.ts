@@ -310,7 +310,12 @@ export type ResumoDia = {
   kcal: number;
   meta: number | null;
   metaOrigem: 'dieta' | 'usuario' | null;
+  /** Metabolismo basal do dia inteiro. */
   tmb: number;
+  /** Metabolismo basal contado até agora (hoje) ou do dia inteiro (dias passados). */
+  tmbAteAgora: number;
+  /** true quando o dia ainda não acabou: gasto e balanço são "até agora". */
+  parcial: boolean;
   atividades: number;
   /** 'relogio' quando a energia ativa veio do Apple Saúde / Health Connect (RN11). */
   atividadesOrigem: 'relogio' | 'estimativa';
@@ -320,14 +325,25 @@ export type ResumoDia = {
   naDieta: boolean;
 };
 
-export function resumoDoDia(data = hojeIso()): ResumoDia {
+/** Fração do dia já passada (0–1) para a data; 1 para dias passados, 0 para futuros. */
+export function fracaoDoDia(data: string, agora = new Date()): number {
+  const hoje = hojeIso(agora);
+  if (data < hoje) return 1;
+  if (data > hoje) return 0;
+  return (agora.getHours() * 3600 + agora.getMinutes() * 60 + agora.getSeconds()) / 86_400;
+}
+
+export function resumoDoDia(data = hojeIso(), agora = new Date()): ResumoDia {
   const dieta = dietaAtiva();
   const consumido = consumosDoDia(data).reduce((t, c) => somar(t, c.valores), {} as Valores);
   const kcal = Math.round(consumido.energia ?? 0);
   const meta = metaCaloricaDoDia(dieta);
   const base = tmb(data)?.kcal ?? 0;
+  const fracao = fracaoDoDia(data, agora);
+  // O corpo gasta o metabolismo basal ao longo do dia: hoje, conta só o que já passou (RN06).
+  const tmbAteAgora = Math.round(base * fracao);
   const { kcal: atividades, origem: atividadesOrigem } = gastoAtividadesComOrigem(data);
-  const gasto = base + atividades;
+  const gasto = tmbAteAgora + atividades;
   return {
     data,
     consumido,
@@ -335,6 +351,8 @@ export function resumoDoDia(data = hojeIso()): ResumoDia {
     meta: meta.kcal,
     metaOrigem: meta.origem,
     tmb: base,
+    tmbAteAgora,
+    parcial: fracao < 1,
     atividades,
     atividadesOrigem,
     gasto,

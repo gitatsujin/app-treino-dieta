@@ -230,7 +230,7 @@ export default function InicioScreen() {
           tone="diet"
           label="Balanço"
           value={`${r.balanco > 0 ? '+' : r.balanco < 0 ? '−' : ''}${num(Math.abs(r.balanco), 0)} kcal`}
-          detail={r.balanco < 0 ? 'déficit hoje' : r.balanco > 0 ? 'superávit hoje' : 'equilíbrio hoje'}
+          detail={`${r.balanco < 0 ? 'déficit' : r.balanco > 0 ? 'superávit' : 'equilíbrio'} até agora`}
           onPress={() => router.push('/dieta/historico')}
         />
       </Row>

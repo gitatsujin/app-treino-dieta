@@ -82,6 +82,15 @@ ciclo ativo, os dias de menstruação. Se uma atividade do relógio coincidir co
 qual vale (RN13). A leitura acontece ao abrir o app e ao voltar para ele (no máximo a cada 10 minutos).
 O código fica em `src/lib/saude/` (adaptadores por plataforma + `sincronizar.ts`, que grava no banco).
 
+## Notificações
+
+Lembretes locais (RF56–RF63), criados no próprio celular com `expo-notifications`: treino nos dias e horário
+escolhidos, refeições nos horários da dieta, pesagem e bioimpedância vencidas, prazo de meta, ciclo e, na hora,
+meta atingida e calorias acima de +7% da meta. Configuração em Perfil › Notificações. A lógica de "o que avisar
+e quando" fica em `src/lib/notificacoes/planejar.ts` (sem código nativo, testável); os lembretes são refeitos ao
+abrir o app e após cada registro. O plugin `plugins/sem-push.js` tira a permissão de push, que a conta gratuita
+da Apple não aceita (os lembretes não precisam dela).
+
 ## O que ainda não funciona no Expo Go
 
 - Apple Saúde e Health Connect: precisam do app instalável.

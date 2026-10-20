@@ -240,22 +240,38 @@ const styles = StyleSheet.create({
   micro: { flexDirection: 'row', alignItems: 'center', gap: space.md },
 });
 
-/** Consumido, gasto (TMB + atividades; com relógio, a energia ativa medida) e balanço do dia (RN06). */
+/**
+ * Consumido, gasto em atividades e balanço do dia (RN06). O gasto mostra só as atividades (com relógio,
+ * a energia ativa medida); o metabolismo basal entra no balanço — hoje, só a parte do dia que já passou.
+ */
 function BalancoDoDia({ r }: { r: ResumoDia }) {
+  const sinal = r.balanco > 0 ? '+' : r.balanco < 0 ? '−' : '';
+  const agora = new Date();
+  const hh = `${String(agora.getHours()).padStart(2, '0')}:${String(agora.getMinutes()).padStart(2, '0')}`;
+  const colunas: [string, string, string][] = [
+    ['Consumido', kcal(r.kcal), 'alimentação'],
+    ['Gasto', kcal(r.atividades), r.atividadesOrigem === 'relogio' ? 'pelo relógio' : 'estimado'],
+    ['Balanço', `${sinal}${kcal(Math.abs(r.balanco))}`, r.parcial ? 'até agora' : 'do dia'],
+  ];
   return (
-    <View style={styles.between}>
-      {[
-        ['Consumido', kcal(r.kcal)],
-        [r.atividadesOrigem === 'relogio' ? 'Gasto (relógio)' : 'Gasto', kcal(r.gasto)],
-        ['Balanço', `${r.balanco > 0 ? '+' : r.balanco < 0 ? '−' : ''}${kcal(Math.abs(r.balanco))}`],
-      ].map(([l, v]) => (
-        <View key={l} style={{ gap: 2 }}>
-          <AppText variant="caption" color="textMuted">
-            {l}
-          </AppText>
-          <AppText variant="itemTitle">{v}</AppText>
-        </View>
-      ))}
+    <View style={{ gap: space.sm }}>
+      <View style={styles.between}>
+        {colunas.map(([l, v, d]) => (
+          <View key={l} style={{ gap: 2 }}>
+            <AppText variant="caption" color="textMuted">
+              {l}
+            </AppText>
+            <AppText variant="itemTitle">{v}</AppText>
+            <AppText variant="caption" color="textMuted">
+              {d}
+            </AppText>
+          </View>
+        ))}
+      </View>
+      <AppText variant="caption" color="textMuted">
+        Balanço = consumido − gasto − metabolismo basal ({kcal(r.tmbAteAgora)}
+        {r.parcial ? ` até as ${hh}, de ${kcal(r.tmb)} no dia` : ''}).
+      </AppText>
     </View>
   );
 }

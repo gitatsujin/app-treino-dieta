@@ -80,7 +80,7 @@ export default function HistoricoDieta() {
                 {i > 0 ? <Divider /> : null}
                 <ListRow
                   title={diaSemanaCurta(x.data)}
-                  subtitle={`${num(x.kcal, 0)} consumidas · ${num(x.gasto, 0)} gastas`}
+                  subtitle={`${num(x.kcal, 0)} consumidas · ${num(x.atividades, 0)} em atividades`}
                   trailing={
                     <View style={{ alignItems: 'flex-end', gap: 4 }}>
                       <AppText variant="button">

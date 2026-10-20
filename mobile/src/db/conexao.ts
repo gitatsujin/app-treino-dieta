@@ -36,6 +36,12 @@ export function avisarMudanca() {
   ouvintes.forEach((o) => o());
 }
 
+/** Ouve qualquer escrita no banco (fora de componentes). Devolve a função para parar de ouvir. */
+export function aoMudar(cb: () => void): () => void {
+  ouvintes.add(cb);
+  return () => ouvintes.delete(cb);
+}
+
 function useVersao() {
   return useSyncExternalStore(
     (cb) => {

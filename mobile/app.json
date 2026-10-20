@@ -40,6 +40,7 @@
     "plugins": [
       "expo-router",
       "./plugins/sem-sandbox-de-scripts",
+      "./plugins/sem-push",
       [
         "expo-splash-screen",
         {

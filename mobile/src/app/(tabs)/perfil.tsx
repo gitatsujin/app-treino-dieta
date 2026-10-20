@@ -1,6 +1,6 @@
 import { router, type Href } from 'expo-router';
 import type { LucideIcon } from 'lucide-react-native';
-import { Database, Download, Droplet, Flame, Heart, Info, Lock, Moon, Ruler, ScanText, Target, Weight } from 'lucide-react-native';
+import { Database, Download, Droplet, Flame, Heart, Info, Lock, Bell, Moon, Ruler, ScanText, Target, Weight } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Avatar, Button, Card, Divider, IconTile, ListRow, Row, Screen, ScreenHeader, SectionHeader, StatCard, Tag } from '@/components/ui';
@@ -9,7 +9,14 @@ import { dietaAtiva } from '@/db/dieta';
 import { bios, medidasDaBio, pesoAtual, pesos, pref, tmb, usuario } from '@/db/perfil';
 import { idade } from '@/lib/calculos';
 import { configLeitura, PROVEDORES } from '@/lib/leitura';
+import { configNotificacoes } from '@/lib/notificacoes';
 import { integracaoAtiva, NOME_SAUDE } from '@/lib/saude';
+
+function resumoNotificacoes() {
+  const c = configNotificacoes();
+  const n = [c.treino, c.refeicoes, c.metas, c.calorias, c.peso, c.bio].filter((x) => x.ativo).length;
+  return n ? `${n} ativas` : 'Desligadas';
+}
 import { dataCompleta, dataCurta, diasEntre, num, somarDias } from '@/lib/formato';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -34,11 +41,13 @@ export default function PerfilScreen() {
       dieta: !!dietaAtiva(),
       leitura: configLeitura(),
       saude: !!integracaoAtiva(),
+      notif: resumoNotificacoes(),
     };
   });
   if (!d.u) return null;
   const u = d.u;
   const config: { icon: LucideIcon; label: string; value?: string; href: Href }[] = [
+    { icon: Bell, label: 'Notificações', value: d.notif, href: '/perfil/notificacoes' },
     { icon: Moon, label: 'Tema', value: d.tema === 'claro' ? 'Claro' : d.tema === 'escuro' ? 'Escuro' : 'Automático', href: '/perfil/tema' },
     { icon: Ruler, label: 'Unidades', value: 'kg, cm', href: '/perfil/unidades' },
     { icon: Target, label: 'Meta de calorias', value: d.dieta ? 'Pela dieta' : u.meta_calorias_kcal ? `${num(u.meta_calorias_kcal, 0)} kcal` : 'Sem meta', href: '/perfil/meta-calorias' },

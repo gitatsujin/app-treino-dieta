@@ -5,6 +5,7 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { OnboardingSteps } from '@/components/OnboardingSteps';
 import { AppText, Banner, BottomActionBar, IconTile, Screen } from '@/components/ui';
+import { pedirPermissao, statusPermissao } from '@/lib/notificacoes';
 import { conectarSaude, NOME_SAUDE, saudeDisponivel } from '@/lib/saude';
 import { space } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -18,7 +19,9 @@ export default function ConectarSaude() {
   useEffect(() => {
     saudeDisponivel().then(setDisponivel);
   }, []);
-  const entrar = () => {
+  const entrar = async () => {
+    // Pede a permissão das notificações uma vez, no fim da entrada (os lembretes já vêm ligados).
+    if ((await statusPermissao()) === 'pendente') await pedirPermissao().catch(() => {});
     if (router.canDismiss()) router.dismissAll();
     router.replace('/');
   };

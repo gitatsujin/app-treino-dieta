@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 
 import { abrirBancoDoAparelho } from '@/db/expo';
 import { fecharSessoesAntigas } from '@/db/treino';
+import { useNotificacoes } from '@/lib/notificacoes';
 import { useSincronizacaoSaude } from '@/lib/saude';
 import { BarraTeclado } from '@/components/ui/Teclado';
 import { useTheme } from '@/theme/use-theme';
@@ -29,6 +30,8 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({ Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold });
   // Apple Saúde / Health Connect: lê o relógio ao abrir e ao voltar para o app.
   useSincronizacaoSaude(true);
+  // Lembretes e alertas locais (RF56–RF63).
+  useNotificacoes(true);
 
   useEffect(() => {
     if (fontsLoaded || fontError) SplashScreen.hideAsync();
